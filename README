@@ -1,1 +1,7 @@
 This is a public repository for my changes to the mathematics software system Sage (http://sagemath.org/). Specifically, the code written during the Google Summer of Code project Lattices (http://gsoc-sage-lattices.blogspot.com/) is hosted here.
+
+SETUP:
+
+- get the source code of Sage 5.0 from http://sagemath.org/
+- create a new development branch using sage -b lattices
+- check out the contents of this repository to your sage root directory, overwriting existing files
