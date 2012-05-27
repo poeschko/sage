@@ -24,14 +24,25 @@ from sage.modules.free_module import FreeModule_ambient
 class Lattice_generic(FreeModule_ambient):
     def __init__(self, base_ring, base):
         FreeModule_ambient.__init__(self, base_ring, len(base))
-        self.base_ring = self.base_ring
         self.base = base
         
     def _repr_(self):
         """
         Text representation of this lattice.
         """
-        return "Lattice on %s with base %s" % (self.base_ring, self.base)
+        return "Lattice on %s with base %s" % (self.base_ring(), self.base)
+    
+    def _latex_(self):
+        """
+        LaTeX representation of this lattice.
+        """
+        return "\\text{Lattice}"
+    
+    def _matrix_(self):
+        """
+        Matrix representation of this lattice.
+        """
+        return self.base
         
 def Lattice(base=None, quadratic_form=None):
     """
@@ -49,7 +60,8 @@ def Lattice(base=None, quadratic_form=None):
     
     EXAMPLES::
     
-        sage: Lattice([(1,0), (0,1)])
+        sage: Lattice([1, 2])
+        Lattice on Integer Ring with base [1, 2]
     """
     
     if base is not None:
