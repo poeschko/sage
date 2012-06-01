@@ -60,17 +60,6 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
     def __init__(self, gens):
         dim = len(gens[0])
         super(Lattice_ZZ_in_RR, self).__init__(RR ** dim, gens)
-   
-''' 
-def lattice_element(value):
-    """
-    A value translated to an element as part of a lattice.
-    Converts lists and tuples to vectors.
-    """
-    if isinstance(value, (list, tuple)):
-        return vector(value)
-    return value
-'''
         
 def Lattice(vector_space=None, basis=None, coefficient_ring=ZZ, quadratic_form=None):
     """
@@ -96,9 +85,7 @@ def Lattice(vector_space=None, basis=None, coefficient_ring=ZZ, quadratic_form=N
     if basis is not None:
         if not basis:
             raise ValueError("base must not be empty")
-        #basis = [lattice_element(element) for element in basis]
         if vector_space is None:
-            #vector_space = basis[0].parent()
             basis_matrix = matrix(basis)
             vector_space = basis_matrix.base_ring() ** basis_matrix.dimensions()[1]
         if coefficient_ring == ZZ:
