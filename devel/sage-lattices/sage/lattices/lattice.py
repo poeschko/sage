@@ -15,7 +15,7 @@ The class inheritance hierarchy is:
 
 AUTHORS:
 
-- Jan Poeschko (2012-05-26): initial version.
+- Jan Poeschko (2012-05-26): initial version
 
 """
 
@@ -48,15 +48,18 @@ class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
     def __init__(self, ambient, basis):
         """
         See :class:`Lattice_with_basis` for documentation.
+        
+        TESTS::
+        
+            sage: L = Lattice([[1, 0], [0, 1]])
+            sage: L.random_element() # random
+            (-1, 2)
         """
-        #self._Lattice_element_class = basis[0].parent()
         self._Lattice_K = basis[0].parent().base_ring()
         self._Lattice_element_class = element_class(self._Lattice_K, is_sparse=False)
         
-        #self.__ambient_module = ambient
-        #C = self.element_class()
-        #basis = [C(self, x.list(), coerce=False, copy=True) for x in basis]
-        #[C(self, x.list(), coerce=False, copy=True) for x in basis]
+        self._element_class = self._Lattice_element_class
+        # _element_class still used internally e.g. by random_element 
         
         super(Lattice_with_basis, self).__init__(ambient, basis, echelonize=False,
             already_echelonized=True, check=False)
@@ -65,9 +68,40 @@ class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
         # Consequently, the basis has to be coerced to appropriate types before
         
     def element_class(self):
+        """
+        The class of elements for this lattice.
+        
+        Preserves the class of vectors in RR^n in a ZZ-lattice.
+        
+        EXAMPLES::
+        
+            sage: L = Lattice([[1.0, 0.0]])
+            sage: L.element_class()
+            <type 'sage.modules.free_module_element.FreeModuleElement_generic_dense'>
+            
+        Whereas the FreeModule implementation coerces to QQ^n::
+        
+            sage: M = FreeModule(ZZ, 2).span([[1.0, 0.0]])
+            sage: M.element_class()
+            <type 'sage.modules.vector_integer_dense.Vector_integer_dense'>
+        """
         return self._Lattice_element_class
         
     def basis_matrix(self):
+        """
+        Return the matrix whose rows are the basis for this lattice.
+        
+        EXAMPLES::
+        
+            sage: L = Lattice([[1, 0, 0], [0, 1, 0]]); L
+            Real-embedded integer lattice of degree 3 and rank 2
+            Basis matrix:
+            [1 0 0]
+            [0 1 0]
+            sage: L.basis_matrix()
+            [1 0 0]
+            [0 1 0]
+        """
         try:
             return self.__basis_matrix
         except AttributeError:
@@ -103,6 +137,13 @@ class Lattice_ZZ(Lattice_with_basis):
         [0 1]
     """
     def __init__(self, basis):
+        """
+        See :class:`Lattice_ZZ` for documentation.
+        
+        TESTS::
+        
+            sage: L = Lattice([[i, 0], [0, 1]])
+        """
         basis = list(basis)
         degree = len(basis[0])
         super(Lattice_ZZ, self).__init__(ZZ ** degree, basis)
@@ -118,10 +159,7 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
     """
     Construct a lattice that is embedded in a real-valued space
     (e.g. RR^n, QQ^n, or ZZ^n).
-    """
-    def __init__(self, basis):
-        super(Lattice_ZZ_in_RR, self).__init__(basis)
-        
+    """        
     def _repr_(self):
         """
         Text representation of this lattice.
