@@ -1,13 +1,13 @@
 """
 Lattices
 
-This module provides the abstract base class :class:`Lattice_generic` from which
+This module provides the base class :class:`Lattice_with_basis` from which
 all lattices in Sage derive, as well as a selection of more
 specific base classes.
 
 The class inheritance hierarchy is:
 
-- :class:`Lattice_generic`
+- :class:`Lattice_with_basis`
 
   - :class:`Lattice_ZZ`
 
@@ -18,8 +18,6 @@ AUTHORS:
 - Jan Poeschko (2012-05-26): initial version
 
 """
-
-#from sage.rings.integer_ring import ZZ
 
 import sage.matrix.matrix_space
 
@@ -33,7 +31,7 @@ from sage.rings.real_mpfr import RR
 
 class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
     """
-    Construct a lattice over a PID with a given basis.
+    Construct a general lattice over a PID with a given basis.
     
     INPUT:
     
@@ -43,6 +41,14 @@ class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
     - ``basis`` -- list of elements of `K^n`, where `K` is the fraction field
       of `R`. These elements must be linearly independent and will be used as
       the default basis of the constructed submodule.
+      
+    EXAMPLES::
+    
+        sage: Lattice([[2, 0], [0, 1]], GF(3))
+        Lattice of degree 2 and rank 2 over Finite Field of size 3
+        Basis matrix:
+        [2 0]
+        [0 1]
     """
         
     def __init__(self, ambient, basis):
@@ -169,6 +175,14 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
     """
     Construct a lattice that is embedded in a real-valued space
     (e.g. RR^n, QQ^n, or ZZ^n).
+    
+    EXAMPLES::
+        
+        sage: L = Lattice([[1.0, 0, 0], [0, 1, 0]]); L
+        Real-embedded integer lattice of degree 3 and rank 2
+        Basis matrix:
+        [ 1.00000000000000 0.000000000000000 0.000000000000000]
+        [0.000000000000000  1.00000000000000 0.000000000000000]
     """        
     def _repr_(self):
         """
