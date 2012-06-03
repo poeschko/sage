@@ -79,7 +79,7 @@ class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
             sage: L.element_class()
             <type 'sage.modules.free_module_element.FreeModuleElement_generic_dense'>
             
-        Whereas the FreeModule implementation coerces to QQ^n::
+        Whereas the `FreeModule` implementation coerces to QQ^n::
         
             sage: M = FreeModule(ZZ, 2).span([[1.0, 0.0]])
             sage: M.element_class()
@@ -91,14 +91,24 @@ class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
         """
         Return the matrix whose rows are the basis for this lattice.
         
+        Use the vector space of the basis vectors instead of the lattice's `base_ring`.
+        
         EXAMPLES::
         
-            sage: L = Lattice([[1, 0, 0], [0, 1, 0]]); L
+            sage: L = Lattice([[1.0, 0, 0], [0, 1, 0]]); L
             Real-embedded integer lattice of degree 3 and rank 2
             Basis matrix:
-            [1 0 0]
-            [0 1 0]
+            [ 1.00000000000000 0.000000000000000 0.000000000000000]
+            [0.000000000000000  1.00000000000000 0.000000000000000]
             sage: L.basis_matrix()
+            [ 1.00000000000000 0.000000000000000 0.000000000000000]
+            [0.000000000000000  1.00000000000000 0.000000000000000]
+            
+        Whereas the `FreeModule` implementation coerces to QQ^n::
+        
+            sage: FreeModule(ZZ, 3).span([[1.0, 0, 0], [0, 1, 0]])
+            Free module of degree 3 and rank 2 over Integer Ring
+            Echelon basis matrix:
             [1 0 0]
             [0 1 0]
         """
@@ -196,8 +206,6 @@ def Lattice(basis=None, coefficient_ring=ZZ, quadratic_form=None):
         basis_matrix = matrix(basis)
         degree = len(basis[0])
         K = basis_matrix.base_ring()
-        #Kn = K ** degree
-        #C = element_class(K, is_sparse=False)
         V = K ** degree
         basis = [V(element) for element in basis]
         if coefficient_ring == ZZ:
