@@ -3,5 +3,5 @@ This is a public repository for my changes to the mathematics software system Sa
 SETUP:
 
 - get the source code of Sage 5.0 from http://sagemath.org/
-- create a new development branch using sage -b lattices
+- create a new development branch using sage -clone lattices
 - check out the contents of this repository to your sage root directory, overwriting existing files
