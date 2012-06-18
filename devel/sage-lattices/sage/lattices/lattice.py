@@ -50,7 +50,7 @@ class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
         [2 0]
         [0 1]
     """
-        
+    
     def __init__(self, ambient, basis):
         """
         See :class:`Lattice_with_basis` for documentation.
@@ -60,6 +60,7 @@ class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
             sage: L = Lattice([[1, 0], [0, 1]])
             sage: L.random_element() # random
             (-1, 2)
+            sage: TestSuite(L).run()
         """
         self._Lattice_K = basis[0].parent().base_ring()
         self._Lattice_element_class = element_class(self._Lattice_K, is_sparse=False)
@@ -159,6 +160,7 @@ class Lattice_ZZ(Lattice_with_basis):
         TESTS::
         
             sage: L = Lattice([[i, 0], [0, 1]])
+            sage: TestSuite(L).run()
         """
         basis = list(basis)
         degree = len(basis[0])
@@ -183,7 +185,18 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         Basis matrix:
         [ 1.00000000000000 0.000000000000000 0.000000000000000]
         [0.000000000000000  1.00000000000000 0.000000000000000]
-    """        
+    """
+    def _init_(self, basis):
+        """
+        See :class:`Lattice_ZZ_in_RR` for documentation.
+        
+        TESTS::
+        
+            sage: L = Lattice([[2, 1, 0], [0, 1, 0]])
+            sage: TestSuite(L).run()
+        """
+        super(Lattice_ZZ_in_RR, self).__init__(basis)
+        
     def _repr_(self):
         """
         Text representation of this lattice.
