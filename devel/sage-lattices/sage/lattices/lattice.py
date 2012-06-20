@@ -32,6 +32,7 @@ from sage.modules.free_module import FreeModule_submodule_with_basis_pid, elemen
 from sage.modules.free_module_element import vector
 from sage.matrix.constructor import matrix
 from sage.rings.integer_ring import ZZ
+from sage.rings.rational_field import QQ
 from sage.rings.real_mpfr import RR
 
 class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
@@ -121,8 +122,24 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         Basis matrix:
         [1 0 0]
         [0 1 0]
+        
+    By default, the basis is reduced using the LLL algorithm::
+    
+        sage: Lattice([[6, 1], [9, 0]])
+        Real-embedded integer lattice of degree 2 and rank 2
+        Basis matrix:
+        [ 0  3]
+        [ 3 -1]
+        
+    However, you can prevent this::
+    
+        sage: Lattice([[6, 1], [9, 0]], reduce_basis=False)
+        Real-embedded integer lattice of degree 2 and rank 2
+        Basis matrix:
+        [6 1]
+        [9 0]
     """
-    def _init_(self, basis):
+    def __init__(self, basis, reduce_basis=True):
         """
         See :class:`Lattice_ZZ_in_RR` for documentation.
         
@@ -131,6 +148,17 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
             sage: L = Lattice([[2, 1, 0], [0, 1, 0]])
             sage: TestSuite(L).run()
         """
+        if reduce_basis:
+            # coerce vectors to QQ^n (QQ is the fraction field of ZZ)
+            # so that LLL algorithm can be applied
+            degree = len(basis[0])
+            fraction_field = QQ ** degree
+            basis = [fraction_field(x) for x in basis]
+            
+            # create basis matrix and apply LLL algorithm 
+            basis_matrix = matrix(basis)
+            basis_matrix = basis_matrix.LLL()
+            basis = list(basis_matrix)
         super(Lattice_ZZ_in_RR, self).__init__(basis)
         
     def _repr_(self):
@@ -140,7 +168,7 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         return "Real-embedded integer lattice of degree %s and rank %s\nBasis matrix:\n%s"%(
             self.degree(), self.rank(),  self.basis_matrix())
         
-def Lattice(basis=None, coefficient_ring=ZZ, quadratic_form=None):
+def Lattice(basis=None, coefficient_ring=ZZ, quadratic_form=None, **kwargs):
     """
     The `Lattice` function creates lattices using a given base
     or an underlying quadratic form.
@@ -160,18 +188,18 @@ def Lattice(basis=None, coefficient_ring=ZZ, quadratic_form=None):
         sage: Lattice([[2, 0, 0], [0, 1, 0]])
         Real-embedded integer lattice of degree 3 and rank 2
         Basis matrix:
-        [2 0 0]
         [0 1 0]
+        [2 0 0]
     """
     if basis is not None:
         if not basis:
             raise ValueError("basis must not be empty")
-        basis_matrix = matrix(basis)
         degree = len(basis[0])
+        basis_matrix = matrix(basis)
         K = basis_matrix.base_ring()
         if coefficient_ring == ZZ:
             if K <= RR:
-                return Lattice_ZZ_in_RR(basis)
+                return Lattice_ZZ_in_RR(basis, **kwargs)
             else:
                 return Lattice_ZZ(basis)
         else:
