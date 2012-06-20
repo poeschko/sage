@@ -34,6 +34,7 @@ from sage.matrix.constructor import matrix
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
 from sage.rings.real_mpfr import RR
+from sage.libs.pari.gen import pari
 
 class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
     """
@@ -167,6 +168,32 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         """
         return "Real-embedded integer lattice of degree %s and rank %s\nBasis matrix:\n%s"%(
             self.degree(), self.rank(),  self.basis_matrix())
+        
+    def shortest_vectors(self, max_length=None, max_count=None):
+        """
+        Find shortest vectors using Pari's Fincke-Pohst algorithm.
+        
+        sage: L = Lattice([[2, 0], [0, 3]])
+        sage: L.shortest_vectors()
+        [(2, 0), (0, 3)]
+        sage: L = Lattice([[2, 1], [1, 1]])
+        sage: L.shortest_vectors()
+        [(0, 1), (-1, 0)]
+        """
+        qf = self.gram_matrix()
+        if max_length is None:
+            # choose trivial upport bound for vector length
+            max_length = sum(sum(x) ** 2 for x in self.basis())
+        if max_count is None:
+            max_count = self.degree()
+        #if self.base_ring() == QQ:
+        #    flag = 2
+        #else:
+        #    flag = 0
+        flag = 2 # allow non-integral entries 
+        count, length, vectors = pari(qf).qfminim(max_length, max_count, flag)
+        vectors = vectors.python()
+        return [self.linear_combination_of_basis(v) for v in vectors.columns()]
         
 def Lattice(basis=None, coefficient_ring=ZZ, quadratic_form=None, **kwargs):
     """
