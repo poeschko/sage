@@ -78,6 +78,13 @@ class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
         """
         return "Lattice of degree %s and rank %s over %s\nBasis matrix:\n%s"%(
             self.degree(), self.rank(), self.base_ring(), self.basis_matrix())
+        
+    def basis_inner_product_matrix(self):
+        """
+        Inner product matrix of basis matrix.
+        """
+        B = self.basis_matrix()
+        return matrix([[b1 * b2 for b1 in B] for b2 in B])
     
 class Lattice_ZZ(Lattice_with_basis):
     """
@@ -126,11 +133,13 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         
     By default, the basis is reduced using the LLL algorithm::
     
-        sage: Lattice([[6, 1], [9, 0]])
+        sage: L = Lattice([[6, 1], [9, 0]]); L
         Real-embedded integer lattice of degree 2 and rank 2
         Basis matrix:
         [ 0  3]
         [ 3 -1]
+        sage: L.discriminant()
+        81
         
     However, you can prevent this::
     
@@ -139,6 +148,8 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         Basis matrix:
         [6 1]
         [9 0]
+        sage: L.discriminant()
+        81
     """
     def __init__(self, basis, reduce_basis=True):
         """
