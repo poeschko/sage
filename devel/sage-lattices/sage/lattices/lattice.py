@@ -78,13 +78,6 @@ class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
         """
         return "Lattice of degree %s and rank %s over %s\nBasis matrix:\n%s"%(
             self.degree(), self.rank(), self.base_ring(), self.basis_matrix())
-        
-    def basis_inner_product_matrix(self):
-        """
-        Inner product matrix of basis matrix.
-        """
-        B = self.basis_matrix()
-        return matrix([[b1 * b2 for b1 in B] for b2 in B])
     
 class Lattice_ZZ(Lattice_with_basis):
     """
