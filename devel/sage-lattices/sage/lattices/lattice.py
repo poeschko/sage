@@ -12,6 +12,11 @@ The class inheritance hierarchy is:
   - :class:`Lattice_ZZ`
 
     - :class:`Lattice_ZZ_in_RR`
+    
+Real-valued vectors are coerced to rationals when used in lattices
+(see discussion at
+https://groups.google.com/forum/?fromgroups#!topic/sage-devel/omE8nI2HFbg).
+Complex-valued vectors do not work in lattices.
 
 AUTHORS:
 
@@ -39,8 +44,7 @@ class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
       i.e. `R^n`;
 
     - ``basis`` -- list of elements of `K^n`, where `K` is the fraction field
-      of `R`. These elements must be linearly independent and will be used as
-      the default basis of the constructed submodule.
+      of `R`.
       
     EXAMPLES::
     
@@ -62,77 +66,9 @@ class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
             (-1, 2)
             sage: TestSuite(L).run()
         """
-        self._Lattice_K = basis[0].parent().base_ring()
-        self._Lattice_element_class = element_class(self._Lattice_K, is_sparse=False)
-        
-        self._element_class = self._Lattice_element_class
-        # _element_class still used internally e.g. by random_element 
         
         super(Lattice_with_basis, self).__init__(ambient, basis, echelonize=False,
-            already_echelonized=True, check=False)
-        # Don't perform check to keep original base field
-        # (e.g. RR^3-vectors in ZZ-lattice, without coercing them to QQ^3).
-        # Consequently, the basis has to be coerced to appropriate types before
-        
-    def element_class(self):
-        """
-        The class of elements for this lattice.
-        
-        Preserves the class of vectors in RR^n in a ZZ-lattice.
-        
-        EXAMPLES::
-        
-            sage: L = Lattice([[1.0, 0.0]])
-            sage: L.element_class()
-            <type 'sage.modules.free_module_element.FreeModuleElement_generic_dense'>
-            
-        Whereas the `FreeModule` implementation coerces to QQ^n::
-        
-            sage: M = FreeModule(ZZ, 2).span([[1.0, 0.0]])
-            sage: M.element_class()
-            <type 'sage.modules.vector_integer_dense.Vector_integer_dense'>
-        """
-        return self._Lattice_element_class
-        
-    def basis_matrix(self):
-        """
-        Return the matrix whose rows are the basis for this lattice.
-        
-        Use the vector space of the basis vectors instead of the lattice's `base_ring`.
-        
-        EXAMPLES::
-        
-            sage: L = Lattice([[1.0, 0, 0], [0, 1, 0]]); L
-            Real-embedded integer lattice of degree 3 and rank 2
-            Basis matrix:
-            [ 1.00000000000000 0.000000000000000 0.000000000000000]
-            [0.000000000000000  1.00000000000000 0.000000000000000]
-            sage: L.basis_matrix()
-            [ 1.00000000000000 0.000000000000000 0.000000000000000]
-            [0.000000000000000  1.00000000000000 0.000000000000000]
-            
-        Whereas the `FreeModule` implementation coerces to QQ^n::
-        
-            sage: FreeModule(ZZ, 3).span([[1.0, 0, 0], [0, 1, 0]])
-            Free module of degree 3 and rank 2 over Integer Ring
-            Echelon basis matrix:
-            [1 0 0]
-            [0 1 0]
-        """
-        try:
-            return self.__basis_matrix
-        except AttributeError:
-            # Use self._Lattice_K instead of self.base_ring()
-            MAT = sage.matrix.matrix_space.MatrixSpace(self._Lattice_K,
-                            len(self.basis()), self.degree(),
-                            sparse = self.is_sparse())
-            if self.is_ambient():
-                A = MAT.identity_matrix()
-            else:
-                A = MAT(self.basis())
-            A.set_immutable()
-            self.__basis_matrix = A
-            return A
+            already_echelonized=True)
         
     def _repr_(self):
         """
@@ -147,10 +83,10 @@ class Lattice_ZZ(Lattice_with_basis):
     
     EXAMPLES::
     
-        sage: Lattice([[i, 0], [0, 1]])
+        sage: Lattice([[GF(3)(1), 0], [0, 1]])
         Integer lattice of degree 2 and rank 2
         Basis matrix:
-        [I 0]
+        [1 0]
         [0 1]
     """
     def __init__(self, basis):
@@ -159,7 +95,7 @@ class Lattice_ZZ(Lattice_with_basis):
         
         TESTS::
         
-            sage: L = Lattice([[i, 0], [0, 1]])
+            sage: L = Lattice([[GF(3)(1), 0], [0, 1]])
             sage: TestSuite(L).run()
         """
         basis = list(basis)
@@ -183,8 +119,8 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         sage: L = Lattice([[1.0, 0, 0], [0, 1, 0]]); L
         Real-embedded integer lattice of degree 3 and rank 2
         Basis matrix:
-        [ 1.00000000000000 0.000000000000000 0.000000000000000]
-        [0.000000000000000  1.00000000000000 0.000000000000000]
+        [1 0 0]
+        [0 1 0]
     """
     def _init_(self, basis):
         """
@@ -233,8 +169,6 @@ def Lattice(basis=None, coefficient_ring=ZZ, quadratic_form=None):
         basis_matrix = matrix(basis)
         degree = len(basis[0])
         K = basis_matrix.base_ring()
-        V = K ** degree
-        basis = [V(element) for element in basis]
         if coefficient_ring == ZZ:
             if K <= RR:
                 return Lattice_ZZ_in_RR(basis)
