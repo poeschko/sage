@@ -2,7 +2,6 @@ from sage.geometry.polyhedron.constructor import Polyhedron
 from sage.matrix.constructor import matrix
 from sage.modules.free_module_element import vector
 from sage.rings.rational_field import QQ
-#from sage.rings.infinity import PlusInfinity
 
 from math import sqrt, floor, ceil
 
@@ -45,6 +44,8 @@ def jacobi(M):
 def diamond_cut(V, GM, C, debug=False):
     " Perform diamond cutting on Polyhedron V with basis matrix GM and radius C "
     
+    GM = GM.N()
+    
     C = float(C)
     if debug:
         print "Cut\n%s\nwith radius %s" % (GM, C)
@@ -55,11 +56,9 @@ def diamond_cut(V, GM, C, debug=False):
     x = [0] * dim
     L = [0] * dim
     
-    #q = GM * GM
     q = matrix([[sum(GM[i][k] * GM[j][k] for k in range(dim)) for j in range(dim)] for i in range(dim)])
     if debug:
         print "q:\n%s" % q.N()
-    #q = q.cholesky_decomposition()
     q = jacobi(q)
     if debug:
         print "q:\n%s" % q.N()
@@ -88,31 +87,29 @@ def diamond_cut(V, GM, C, debug=False):
             print "x: %s" % x
         if x[i] > L[i]:
             i += 1
-            continue
-        if i > 0:
+        elif i > 0:
             T[i - 1] = T[i] - q[i][i] * (x[i] + U[i]) ** 2
             i -= 1
             U[i] = 0
             for j in range(i + 1, dim):
                 U[i] += q[i][j] * x[j]
             new_dimension = True
-            continue
-        #else:
-        if all(elmt == 0 for elmt in x):
-            break
-        hv = [0] * dim
-        for k in range(dim):
-            for j in range(dim):
-                hv[k] += x[j] * GM[j][k].N()
-        hv = vector(hv)
-                
-        for hv in [hv, -hv]:
-            cut_count += 1
-            if debug:
-                print "\n%d) Cut using normal vector %s" % (cut_count, hv)
-            hv = [QQ(elmt) for elmt in hv]
-            cut = Polyhedron(ieqs=[plane_inequality(hv)])
-            V = V.intersection(cut)
+        else:
+            if all(elmt == 0 for elmt in x):
+                break
+            hv = [0] * dim
+            for k in range(dim):
+                for j in range(dim):
+                    hv[k] += x[j] * GM[j][k].N()
+            hv = vector(hv)
+                    
+            for hv in [hv, -hv]:
+                cut_count += 1
+                if debug:
+                    print "\n%d) Cut using normal vector %s" % (cut_count, hv)
+                hv = [QQ(elmt) for elmt in hv]
+                cut = Polyhedron(ieqs=[plane_inequality(hv)])
+                V = V.intersection(cut)
         
     if debug:
         print "End"
@@ -131,20 +128,7 @@ def calculate_voronoi_cell(basis, debug=False):
     Q = Polyhedron(ieqs=ieqs)
     
     # twice the length of longest vertex in Q is a safe choice
-    """radius = 0
-    for v in Q.vertex_generator():
-        #print v
-        l = abs(v.vector()).N()
-        if l > radius:
-            radius = l
-        #print "%s: %d" % (v, l)
-        #if l < 100:
-    radius *= 2"""
-            
-    #radius = 6
     radius = 2 * max(abs(v.vector()).N() for v in Q.vertex_generator())
-    #radius = max(abs(vector(v)) for v in basis)#
-    #radius = 6
     
     V = diamond_cut(Q, basis, radius, debug=debug)
     return V
