@@ -69,6 +69,7 @@ def diamond_cut(V, GM, C, debug=False):
     
     new_dimension = True
     cut_count = 0
+    inequalities = []
     while True:
         if debug:
             print "Dimension: %d" % i
@@ -107,10 +108,16 @@ def diamond_cut(V, GM, C, debug=False):
                 cut_count += 1
                 if debug:
                     print "\n%d) Cut using normal vector %s" % (cut_count, hv)
-                hv = [QQ(elmt) for elmt in hv]
-                cut = Polyhedron(ieqs=[plane_inequality(hv)])
-                V = V.intersection(cut)
-        
+                hv = [QQ(round(elmt, 6)) for elmt in hv]
+                inequalities.append(plane_inequality(hv))
+                #cut = Polyhedron(ieqs=[plane_inequality(hv)])
+                #V = V.intersection(cut)
+           
+    if debug:
+        print "Final cut"     
+    cut = Polyhedron(ieqs=inequalities)
+    V = V.intersection(cut)
+    
     if debug:
         print "End"
     
@@ -129,6 +136,7 @@ def calculate_voronoi_cell(basis, debug=False):
     
     # twice the length of longest vertex in Q is a safe choice
     radius = 2 * max(abs(v.vector()).N() for v in Q.vertex_generator())
+    radius = 1
     
     V = diamond_cut(Q, basis, radius, debug=debug)
     return V
