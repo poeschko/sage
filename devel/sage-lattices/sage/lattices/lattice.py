@@ -198,6 +198,20 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         count, length, vectors = pari(qf).qfminim(max_length, max_count, flag)
         vectors = vectors.python()
         return [self.linear_combination_of_basis(v) for v in vectors.columns()]
+    
+    def voronoi_cell(self):
+        """
+        Compute the Voronoi cell of a lattice, returning a Polyhedron.
+        
+        sage: L = Lattice([[1, 0], [0, 1]])
+        sage: V = L.voronoi_cell()
+        sage: V.Vrepresentation()
+        (A vertex at (1/2, -1/2), A vertex at (1/2, 1/2), A vertex at (-1/2, 1/2), A vertex at (-1/2, -1/2))
+        """
+        
+        from diamond_cutting import calculate_voronoi_cell
+        
+        return calculate_voronoi_cell(self.basis_matrix())
         
 def Lattice(basis=None, coefficient_ring=ZZ, quadratic_form=None, **kwargs):
     """
