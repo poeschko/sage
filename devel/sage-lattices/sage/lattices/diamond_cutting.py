@@ -1,5 +1,5 @@
 from sage.geometry.polyhedron.constructor import Polyhedron
-from sage.matrix.constructor import matrix
+from sage.matrix.constructor import matrix, identity_matrix
 from sage.modules.free_module_element import vector
 from sage.rings.rational_field import QQ
 
@@ -44,21 +44,25 @@ def jacobi(M):
 def diamond_cut(V, GM, C, debug=False):
     " Perform diamond cutting on Polyhedron V with basis matrix GM and radius C "
     
-    GM = GM.N()
-    
+    # coerce to floats 
+    GM = GM.N()    
     C = float(C)
     if debug:
         print "Cut\n%s\nwith radius %s" % (GM, C)
     
-    dim = len(GM[0])
+    dim = GM.dimensions()
+    assert dim[0] == dim[1]
+    dim = dim[0]
     T = [0] * dim
     U = [0] * dim
     x = [0] * dim
     L = [0] * dim
     
+    # calculate the Gram matrix
     q = matrix([[sum(GM[i][k] * GM[j][k] for k in range(dim)) for j in range(dim)] for i in range(dim)])
     if debug:
         print "q:\n%s" % q.N()
+    # apply Cholesky/Jacobi decomposition
     q = jacobi(q)
     if debug:
         print "q:\n%s" % q.N()
@@ -101,7 +105,7 @@ def diamond_cut(V, GM, C, debug=False):
             hv = [0] * dim
             for k in range(dim):
                 for j in range(dim):
-                    hv[k] += x[j] * GM[j][k].N()
+                    hv[k] += x[j] * GM[j][k]
             hv = vector(hv)
                     
             for hv in [hv, -hv]:
@@ -123,9 +127,21 @@ def diamond_cut(V, GM, C, debug=False):
     
     return V
     
-def calculate_voronoi_cell(basis, debug=False):
+def calculate_voronoi_cell(basis, radius=None, debug=False):
     " Calculate the Voronoi cell of the lattice defined by basis "
     
+    dim = basis.dimensions()
+    artificial_length = None
+    if dim[0] < dim[1]:
+        # introduce "artificial" basis points (representing infinity)
+        artificial_length = ceil(max(abs(v) for v in basis)) * 2
+        additional_vectors = identity_matrix(dim[1]) * artificial_length
+        basis = basis.stack(additional_vectors)
+        # LLL-reduce to get quadratic matrix
+        basis = basis.LLL()
+        basis = matrix([v for v in basis if v])
+        dim = basis.dimensions()
+    assert dim[0] == dim[1]
     basis = basis / 2
     
     ieqs = []
@@ -135,8 +151,16 @@ def calculate_voronoi_cell(basis, debug=False):
     Q = Polyhedron(ieqs=ieqs)
     
     # twice the length of longest vertex in Q is a safe choice
-    radius = 2 * max(abs(v.vector()).N() for v in Q.vertex_generator())
-    radius = 1
+    if radius is None:
+        radius = 2 * max(abs(v.vector()).N() for v in Q.vertex_generator())
     
     V = diamond_cut(Q, basis, radius, debug=debug)
+    
+    if artificial_length is not None:
+        # remove inequalities introduced by artificial basis points
+        H = V.Hrepresentation()
+        H = [v for v in H if all(not V._is_zero(v.A() * w / 2 - v.b() and
+            not V._is_zero(v.A() * (-w) / 2 - v.b())) for w in additional_vectors)]
+        V = Polyhedron(ieqs=H)
+        
     return V

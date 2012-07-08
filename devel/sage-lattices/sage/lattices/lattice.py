@@ -35,6 +35,8 @@ from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
 from sage.rings.real_mpfr import RR
 from sage.libs.pari.gen import pari
+        
+from diamond_cutting import calculate_voronoi_cell
 
 class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
     """
@@ -163,8 +165,21 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
             # create basis matrix and apply LLL algorithm 
             basis_matrix = matrix(basis)
             basis_matrix = basis_matrix.LLL()
-            basis = list(basis_matrix)
+            
+            # remove 0-vectors from basis
+            basis = list(v for v in basis_matrix if v)
+            self.__reduced_basis = basis
+        else:
+            self.__reduced_basis = None
         super(Lattice_ZZ_in_RR, self).__init__(basis)
+        
+    def reduced_basis(self):
+        if self.__reduced_basis is None:
+            basis_matrix = self.basis_matrix()
+            basis_matrix = basis_matrix.LLL()
+            basis = list(v for v in basis_matrix if v)
+            self.__reduced_basis = basis
+        return self.__reduced_basis
         
     def _repr_(self):
         """
@@ -199,19 +214,42 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         vectors = vectors.python()
         return [self.linear_combination_of_basis(v) for v in vectors.columns()]
     
-    def voronoi_cell(self):
+    def voronoi_cell(self, radius=None):
         """
         Compute the Voronoi cell of a lattice, returning a Polyhedron.
         
-        sage: L = Lattice([[1, 0], [0, 1]])
-        sage: V = L.voronoi_cell()
-        sage: V.Vrepresentation()
-        (A vertex at (1/2, -1/2), A vertex at (1/2, 1/2), A vertex at (-1/2, 1/2), A vertex at (-1/2, -1/2))
+        INPUT:
+        
+        - ``radius``  -- radius of ball containing considered vertices
+          (default: automatic determination).
+          
+        OUTPUT:
+        
+        The Voronoi cell as a Polyhedron instance.
+        
+        EXAMPLES::
+        
+            sage: L = Lattice([[1, 0], [0, 1]])
+            sage: V = L.voronoi_cell()
+            sage: V.Vrepresentation()
+            (A vertex at (1/2, -1/2), A vertex at (1/2, 1/2), A vertex at (-1/2, 1/2), A vertex at (-1/2, -1/2))
+            
+        Lattices not having full dimension are handled as well:
+        
+            sage: L = Lattice([[2, 0, 0], [0, 2, 0]])
+            sage: V = L.voronoi_cell()
+            sage: V.Hrepresentation()
+            (An inequality (-1, 0, 0) x + 1 >= 0, An inequality (0, -1, 0) x + 1 >= 0, An inequality (1, 0, 0) x + 1 >= 0, An inequality (0, 1, 0) x + 1 >= 0)
+        
+        "Over-dimensional" lattices are reduced first:
+        
+            sage: L = Lattice([[1, 0], [2, 0], [0, 2]])
+            sage: L.voronoi_cell().Vrepresentation()
+            (A vertex at (1/2, -1), A vertex at (1/2, 1), A vertex at (-1/2, 1), A vertex at (-1/2, -1))
         """
         
-        from diamond_cutting import calculate_voronoi_cell
-        
-        return calculate_voronoi_cell(self.basis_matrix())
+        basis_matrix = matrix(self.reduced_basis())
+        return calculate_voronoi_cell(basis_matrix, radius=radius)
         
 def Lattice(basis=None, coefficient_ring=ZZ, quadratic_form=None, **kwargs):
     """
