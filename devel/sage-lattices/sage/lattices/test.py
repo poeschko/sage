@@ -2,6 +2,8 @@ from sage.all import *
 
 from diamond_cutting import *
 
+import time
+
 #L = Lattice([[GF(3)(1), 0], [0, 1]])
 #print L
 #print L.zero() + L.an_element()
@@ -56,6 +58,14 @@ lv6 = """
   3.7281308e-001  2.8456344e-001 -1.7307180e-001 -4.5556135e-001  1.2412671e+000  0.0000000e+000
  -7.4569690e-001 -5.6918088e-001  3.4619130e-001 -5.5058489e-001 -6.4855953e-001  6.2011907e-001
  """
+matas6 = """
+ 2.4494897427832E+00   0.0000000000000E+00   0.0000000000000E+00   0.0000000000000E+00   0.0000000000000E+00   0.0000000000000E+00  
+-4.0824829046386E-01   2.4152294576982E+00   0.0000000000000E+00   0.0000000000000E+00   0.0000000000000E+00   0.0000000000000E+00  
+-4.0824829046386E-01  -4.8304589153965E-01   2.3664319132398E+00   0.0000000000000E+00   0.0000000000000E+00   0.0000000000000E+00  
+-4.0824829046386E-01  -4.8304589153965E-01  -5.9160797830996E-01   2.2912878474779E+00   0.0000000000000E+00   0.0000000000000E+00  
+-4.0824829046386E-01  -4.8304589153965E-01  -5.9160797830996E-01  -7.6376261582597E-01   2.1602468994693E+00   0.0000000000000E+00  
+-4.0824829046386E-01  -4.8304589153965E-01  -5.9160797830996E-01  -7.6376261582597E-01  -1.0801234497346E+00   1.8708286933870E+00  
+"""
 
 def test_lattice(data):
     M = []
@@ -69,22 +79,22 @@ def test_lattice(data):
         if row:
             M.append(row)
     M = matrix(M)
-    V = calculate_voronoi_cell(M, debug=True)
+    start = time.clock()
+    V = calculate_voronoi_cell(M, radius=3, debug=True)
+    stop = time.clock()
     print V.Vrepresentation()
     print V.Hrepresentation()
+    print "Computed Voronoi cell in %f seconds" % (stop - start)
     
 #test_lattice(m2b)
 #test_lattice(cr6)
 #test_lattice(lv6)
+test_lattice(matas6)
 
 #test_lattice("1 0 0 0 0\n0 2 1 0 0")
-test_lattice("""
-2 0 0
-0 2 0
-""")
 
-L = Lattice([[1, 0], [2, 0], [0, 2]])
-print L.voronoi_cell().Vrepresentation()
+#L = Lattice([[1, 0], [2, 0], [0, 2]])
+#print L.voronoi_cell().Vrepresentation()
 
 """
 #GM = matrix([[0, 3], [3, -1]])
