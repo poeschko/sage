@@ -89,12 +89,14 @@ def test_lattice(data):
 #test_lattice(m2b)
 #test_lattice(cr6)
 #test_lattice(lv6)
-test_lattice(matas6)
+#test_lattice(matas6)
 
 #test_lattice("1 0 0 0 0\n0 2 1 0 0")
 
 #L = Lattice([[1, 0], [2, 0], [0, 2]])
 #print L.voronoi_cell().Vrepresentation()
+
+L = Lattice(quadratic_form=[[2,0], [0,2]])
 
 """
 #GM = matrix([[0, 3], [3, -1]])

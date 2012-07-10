@@ -35,6 +35,8 @@ from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
 from sage.rings.real_mpfr import RR
 from sage.libs.pari.gen import pari
+from sage.matrix.matrix_space import MatrixSpace
+from sage.symbolic.ring import SymbolicRing
         
 from diamond_cutting import calculate_voronoi_cell
 
@@ -273,6 +275,14 @@ def Lattice(basis=None, coefficient_ring=ZZ, quadratic_form=None, **kwargs):
         Basis matrix:
         [0 1 0]
         [2 0 0]
+        
+    A lattice can be specified by a quadratic form::
+        
+        sage: Lattice(quadratic_form=[[4, 0], [0, 1]])
+        Real-embedded integer lattice of degree 2 and rank 2
+        Basis matrix:
+        [0 1]
+        [2 0]
     """
     if basis is not None:
         if not basis:
@@ -288,6 +298,17 @@ def Lattice(basis=None, coefficient_ring=ZZ, quadratic_form=None, **kwargs):
         else:
             return Lattice_with_basis(coefficient_ring ** degree, basis)
     elif quadratic_form is not None:
-        raise NotImplementedError()
+        quadratic_form = matrix(quadratic_form)
+        # apply Cholesky decomposition to Gram matrix to get basis
+        try:
+            Q = quadratic_form.cholesky_decomposition()
+        except ValueError:
+            # switch to SymbolicRing matrix to allow Cholesky decomposition
+            # containing square roots etc.
+            dim = quadratic_form.dimensions()
+            space = MatrixSpace(SymbolicRing(), dim[0], dim[1])
+            quadratic_form = space(quadratic_form)
+            Q = quadratic_form.cholesky_decomposition()
+        return Lattice(basis=Q, coefficient_ring=coefficient_ring, **kwargs)
     else:
         raise TypeError("basis or quadratic_form must be given")
