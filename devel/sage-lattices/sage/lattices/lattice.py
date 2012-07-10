@@ -176,6 +176,19 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         super(Lattice_ZZ_in_RR, self).__init__(basis)
         
     def reduced_basis(self):
+        """
+        Return the LLL-reduced basis for this lattice.
+        
+        EXAMPLES::
+        
+            sage: L = Lattice([[6, 1], [9, 0]], reduce_basis=False); L
+            Real-embedded integer lattice of degree 2 and rank 2
+            Basis matrix:
+            [6 1]
+            [9 0]
+            sage: L.reduced_basis()
+            [(0, 3), (3, -1)]
+        """
         if self.__reduced_basis is None:
             basis_matrix = self.basis_matrix()
             basis_matrix = basis_matrix.LLL()
@@ -194,12 +207,14 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         """
         Find shortest vectors using Pari's Fincke-Pohst algorithm.
         
-        sage: L = Lattice([[2, 0], [0, 3]])
-        sage: L.shortest_vectors()
-        [(2, 0), (0, 3)]
-        sage: L = Lattice([[2, 1], [1, 1]])
-        sage: L.shortest_vectors()
-        [(0, 1), (-1, 0)]
+        EXAMPLES::
+        
+            sage: L = Lattice([[2, 0], [0, 3]])
+            sage: L.shortest_vectors()
+            [(2, 0), (0, 3)]
+            sage: L = Lattice([[2, 1], [1, 1]])
+            sage: L.shortest_vectors()
+            [(0, 1), (-1, 0)]
         """
         qf = self.gram_matrix()
         if max_length is None:
@@ -236,14 +251,14 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
             sage: V.Vrepresentation()
             (A vertex at (1/2, -1/2), A vertex at (1/2, 1/2), A vertex at (-1/2, 1/2), A vertex at (-1/2, -1/2))
             
-        Lattices not having full dimension are handled as well:
+        Lattices not having full dimension are handled as well::
         
             sage: L = Lattice([[2, 0, 0], [0, 2, 0]])
             sage: V = L.voronoi_cell()
             sage: V.Hrepresentation()
             (An inequality (-1, 0, 0) x + 1 >= 0, An inequality (0, -1, 0) x + 1 >= 0, An inequality (1, 0, 0) x + 1 >= 0, An inequality (0, 1, 0) x + 1 >= 0)
         
-        "Over-dimensional" lattices are reduced first:
+        "Over-dimensional" lattices are reduced first::
         
             sage: L = Lattice([[1, 0], [2, 0], [0, 2]])
             sage: L.voronoi_cell().Vrepresentation()
