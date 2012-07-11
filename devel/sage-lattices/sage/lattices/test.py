@@ -96,7 +96,7 @@ def test_lattice(data):
 #L = Lattice([[1, 0], [2, 0], [0, 2]])
 #print L.voronoi_cell().Vrepresentation()
 
-L = Lattice(quadratic_form=[[2,0], [0,2]])
+#L = Lattice(quadratic_form=[[2,0], [0,2]])
 
 """
 #GM = matrix([[0, 3], [3, -1]])
@@ -106,3 +106,6 @@ V = calculate_voronoi_cell(matrix(GM))
 print V.Hrepresentation()
 print V.Vrepresentation()
 """
+
+A = Matrix(RDF, 3, 3, [1.0/n for n in range(1, 10)])
+print A.LLL()
