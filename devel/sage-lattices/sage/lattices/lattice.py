@@ -278,12 +278,7 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
             x = ieq[1:]
             n = sum(y ** 2 for y in x)
             return vector([2 * y * c / n for y in x])
-            #c, a, b = ieq
-            #n = a ** 2 + b ** 2
-            #return vector((2 * a * c / n, 2 * b * c / n))
-        
-        #B = self.basis()
-        #return [v for v in B if V.contains(v / 2)]
+
         return [defining_point(ieq) for ieq in V.inequality_generator()]
     
     def closest_vector(self, t):
@@ -302,7 +297,6 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         
         def projection(M, v):
             Mt = M.transpose()
-            #P = M * (Mt * M) ** (-1) * Mt
             P = Mt * (M * Mt) ** (-1) * M
             return P * v
         
@@ -311,14 +305,11 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         def CVPP_2V(t, V, voronoi_cell):
             t_new = t
             while not voronoi_cell.contains(t_new.list()):
-                #print t_new
                 v = max(V, key=lambda v: t_new * v / v.norm() ** 2)
                 t_new = t_new - v
-                #print "=> - %s => %s" % (v, t_new)
             return t - t_new
             
         V = self.voronoi_relevant_vectors()
-        #print V
         t = vector(t)
         p = 0
         while not (ZZ(2 ** p) * voronoi_cell).contains(t):
@@ -327,9 +318,7 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         i = p
         while i >= 1:
             V_scaled = [v * (2 ** (i - 1)) for v in V]
-            #print V_scaled
             t_new = t_new - CVPP_2V(t_new, V_scaled, ZZ(2 ** (i - 1)) * voronoi_cell)
-            #ZZ(2 ** (i - 1)) * V)
             i -= 1
         return t - t_new
         
