@@ -270,14 +270,37 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
     def voronoi_relevant_vectors(self):
         """
         Compute the vectors inducing the Voronoi cell.
+        
+        OUTPUT:
+        
+        The list of Voronoi relevant vectors.
+        
+        EXAMPLES::
+        
+            sage: L = Lattice([[3, 0], [4, 0]])
+            sage: L.voronoi_relevant_vectors()
+            [(-1, 0), (1, 0)]
         """
         V = self.voronoi_cell()
         
         def defining_point(ieq):
+            """
+            Compute the point defining an inequality.
+            
+            INPUT:
+            
+            - ``ieq`` - an inequality in the form [c, a1, a2, ...]
+              meaning a1 * x1 + a2 * x2 + ... <= c
+              
+            OUTPUT:
+            
+            The point orthogonal to the hyperplane defined by ``ieq``
+            in twice the distance from the origin.
+            """
             c = ieq[0]
-            x = ieq[1:]
-            n = sum(y ** 2 for y in x)
-            return vector([2 * y * c / n for y in x])
+            a = ieq[1:]
+            n = sum(y ** 2 for y in a)
+            return vector([2 * y * c / n for y in a])
 
         return [defining_point(ieq) for ieq in V.inequality_generator()]
     
@@ -292,6 +315,23 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         OUTPUT:
         
         The vector in the lattice closest to ``t``.
+        
+        EXAMPLES::
+        
+            sage: L = Lattice([[1, 0], [0, 1]])
+            sage: L.closest_vector((-6, 5/3))
+            (-6, 2)
+            
+        ALGORITHM:
+        
+        Uses the algorithm from [Mic2010].
+        
+        REFERENCES:
+        
+        .. [Mic2010] D. Micciancio, P. Voulgaris. A Deterministic Single
+          Exponential Time Algorithm for Most Lattice Problems based on
+          Voronoi Cell Computations.
+          Proceedings of the 42nd ACM Symposium Theory of Computation, 2010.
         """
         voronoi_cell = self.voronoi_cell()
         
