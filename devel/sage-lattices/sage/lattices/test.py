@@ -96,7 +96,16 @@ def test_lattice(data):
 #L = Lattice([[1, 0], [2, 0], [0, 2]])
 #print L.voronoi_cell().Vrepresentation()
 
-L = Lattice(quadratic_form=[[2,0], [0,2]])
+#L = Lattice(quadratic_form=[[2,0], [0,2]])
+
+L = Lattice(quadratic_form=[[1,0], [0,1]])
+print L.closest_vector([0.4, 0.2])
+print L.closest_vector([1.5, 2.5])
+print L.closest_vector([1, 1])
+print L.closest_vector([6, 0.6])
+
+L = Lattice([[1,0,0], [0,1,0]])
+print L.closest_vector([4, 2.6, 3.6])
 
 """
 #GM = matrix([[0, 3], [3, -1]])

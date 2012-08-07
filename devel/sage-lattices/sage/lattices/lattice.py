@@ -237,7 +237,7 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         
         INPUT:
         
-        - ``radius``  -- radius of ball containing considered vertices
+        - ``radius`` -- radius of ball containing considered vertices
           (default: automatic determination).
           
         OUTPUT:
@@ -263,10 +263,75 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
             sage: L = Lattice([[1, 0], [2, 0], [0, 2]])
             sage: L.voronoi_cell().Vrepresentation()
             (A vertex at (1/2, -1), A vertex at (1/2, 1), A vertex at (-1/2, 1), A vertex at (-1/2, -1))
-        """
-        
+        """        
         basis_matrix = matrix(self.reduced_basis())
         return calculate_voronoi_cell(basis_matrix, radius=radius)
+    
+    def voronoi_relevant_vectors(self):
+        """
+        Compute the vectors inducing the Voronoi cell.
+        """
+        V = self.voronoi_cell()
+        
+        def defining_point(ieq):
+            c = ieq[0]
+            x = ieq[1:]
+            n = sum(y ** 2 for y in x)
+            return vector([2 * y * c / n for y in x])
+            #c, a, b = ieq
+            #n = a ** 2 + b ** 2
+            #return vector((2 * a * c / n, 2 * b * c / n))
+        
+        #B = self.basis()
+        #return [v for v in B if V.contains(v / 2)]
+        return [defining_point(ieq) for ieq in V.inequality_generator()]
+    
+    def closest_vector(self, t):
+        """
+        Compute the closest vector in the lattice to a given vector.
+        
+        INPUT:
+        
+        - ``t`` -- the target vector to compute the closest vector to.
+        
+        OUTPUT:
+        
+        The vector in the lattice closest to ``t``.
+        """
+        voronoi_cell = self.voronoi_cell()
+        
+        def projection(M, v):
+            Mt = M.transpose()
+            #P = M * (Mt * M) ** (-1) * Mt
+            P = Mt * (M * Mt) ** (-1) * M
+            return P * v
+        
+        t = projection(matrix(self.basis()), vector(t))
+        
+        def CVPP_2V(t, V, voronoi_cell):
+            t_new = t
+            while not voronoi_cell.contains(t_new.list()):
+                #print t_new
+                v = max(V, key=lambda v: t_new * v / v.norm() ** 2)
+                t_new = t_new - v
+                #print "=> - %s => %s" % (v, t_new)
+            return t - t_new
+            
+        V = self.voronoi_relevant_vectors()
+        #print V
+        t = vector(t)
+        p = 0
+        while not (ZZ(2 ** p) * voronoi_cell).contains(t):
+            p += 1
+        t_new = t
+        i = p
+        while i >= 1:
+            V_scaled = [v * (2 ** (i - 1)) for v in V]
+            #print V_scaled
+            t_new = t_new - CVPP_2V(t_new, V_scaled, ZZ(2 ** (i - 1)) * voronoi_cell)
+            #ZZ(2 ** (i - 1)) * V)
+            i -= 1
+        return t - t_new
         
 def Lattice(basis=None, coefficient_ring=ZZ, quadratic_form=None, **kwargs):
     """
