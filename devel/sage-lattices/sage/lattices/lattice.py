@@ -410,7 +410,7 @@ def Lattice(basis=None, coefficient_ring=ZZ, quadratic_form=None, **kwargs):
         quadratic_form = matrix(quadratic_form)
         # apply Cholesky decomposition to Gram matrix to get basis
         try:
-            Q = quadratic_form.cholesky_decomposition()
+            Q = quadratic_form.cholesky()
         except ValueError:
             # switch to SymbolicRing matrix to allow Cholesky decomposition
             # containing square roots etc.
