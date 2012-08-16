@@ -79,6 +79,14 @@ class Lattice_with_basis(FreeModule_submodule_with_basis_pid):
     def _repr_(self):
         """
         Text representation of this lattice.
+        
+        TESTS::
+        
+            sage: Lattice([[2, 0], [0, 1]], GF(3))
+            Lattice of degree 2 and rank 2 over Finite Field of size 3
+            Basis matrix:
+            [2 0]
+            [0 1]
         """
         return "Lattice of degree %s and rank %s over %s\nBasis matrix:\n%s"%(
             self.degree(), self.rank(), self.base_ring(), self.basis_matrix())
@@ -111,6 +119,14 @@ class Lattice_ZZ(Lattice_with_basis):
     def _repr_(self):
         """
         Text representation of this lattice.
+        
+        TESTS::
+    
+            sage: Lattice([[GF(3)(1), 0], [0, 1]])
+            Integer lattice of degree 2 and rank 2
+            Basis matrix:
+            [1 0]
+            [0 1]
         """
         return "Integer lattice of degree %s and rank %s\nBasis matrix:\n%s"%(
             self.degree(), self.rank(), self.basis_matrix())
@@ -175,6 +191,8 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
             self.__reduced_basis = None
         super(Lattice_ZZ_in_RR, self).__init__(basis)
         
+        self.__voronoi_cell = None  # cached result of voronoi_cell
+        
     def reduced_basis(self):
         """
         Return the LLL-reduced basis for this lattice.
@@ -199,6 +217,14 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
     def _repr_(self):
         """
         Text representation of this lattice.
+        
+        TESTS::
+        
+            sage: L = Lattice([[1.0, 0, 0], [0, 1, 0]]); L
+            Real-embedded integer lattice of degree 3 and rank 2
+            Basis matrix:
+            [1 0 0]
+            [0 1 0]
         """
         return "Real-embedded integer lattice of degree %s and rank %s\nBasis matrix:\n%s"%(
             self.degree(), self.rank(),  self.basis_matrix())
@@ -244,6 +270,9 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
         
         The Voronoi cell as a Polyhedron instance.
         
+        The result is cached so that subsequent calls to this function
+        return instantly.
+        
         EXAMPLES::
         
             sage: L = Lattice([[1, 0], [0, 1]])
@@ -263,9 +292,11 @@ class Lattice_ZZ_in_RR(Lattice_ZZ):
             sage: L = Lattice([[1, 0], [2, 0], [0, 2]])
             sage: L.voronoi_cell().Vrepresentation()
             (A vertex at (1/2, -1), A vertex at (1/2, 1), A vertex at (-1/2, 1), A vertex at (-1/2, -1))
-        """        
-        basis_matrix = matrix(self.reduced_basis())
-        return calculate_voronoi_cell(basis_matrix, radius=radius)
+        """
+        if self.__voronoi_cell is None:
+            basis_matrix = matrix(self.reduced_basis())
+            self.__voronoi_cell = calculate_voronoi_cell(basis_matrix, radius=radius)
+        return self.__voronoi_cell
     
     def voronoi_relevant_vectors(self):
         """

@@ -6,7 +6,8 @@ from sage.rings.rational_field import QQ
 from math import sqrt, floor, ceil
 
 def plane_inequality(v):
-    """ Return the inequality for points on the same side as the origin
+    """
+    Return the inequality for points on the same side as the origin
     with respect to the plane through v normal to v.
     
     sage: from sage.lattices.diamond_cutting import plane_inequality
@@ -23,7 +24,9 @@ def plane_inequality(v):
     return [c] + list(v)
 
 def jacobi(M):
-    " Cholesky/Jacobi decomposition of M "
+    """
+    Cholesky/Jacobi decomposition of M
+    """
     
     dim = M.dimensions()
     assert dim[0] == dim[1]
@@ -42,7 +45,9 @@ def jacobi(M):
     return matrix(q)
 
 def diamond_cut(V, GM, C, debug=False):
-    " Perform diamond cutting on Polyhedron V with basis matrix GM and radius C "
+    """
+    Perform diamond cutting on Polyhedron V with basis matrix GM and radius C
+    """
     
     # coerce to floats 
     GM = GM.N()    
@@ -128,7 +133,9 @@ def diamond_cut(V, GM, C, debug=False):
     return V
     
 def calculate_voronoi_cell(basis, radius=None, debug=False):
-    " Calculate the Voronoi cell of the lattice defined by basis "
+    """
+    Calculate the Voronoi cell of the lattice defined by basis
+    """
     
     dim = basis.dimensions()
     artificial_length = None
