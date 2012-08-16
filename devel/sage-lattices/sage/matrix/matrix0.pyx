@@ -138,6 +138,7 @@ cdef class Matrix(sage.structure.element.Matrix):
             sage: a = matrix([[1,2],[3,4]])
             sage: b = a.copy()
             doctest:...: DeprecationWarning: the .copy() method is deprecated; please use the copy() function instead, for example, copy(M)
+            See http://trac.sagemath.org/6521 for details.
             sage: b = copy(a)
 
         ::
@@ -163,8 +164,8 @@ cdef class Matrix(sage.structure.element.Matrix):
             ...
             IndexError: polynomials are immutable
         """
-        import sage.misc.misc
-        sage.misc.misc.deprecation("the .copy() method is deprecated; please use the copy() function instead, for example, copy(M)")
+        from sage.misc.superseded import deprecation
+        deprecation(6521, "the .copy() method is deprecated; please use the copy() function instead, for example, copy(M)")
         return self.__copy__()
 
     def list(self):
@@ -4864,11 +4865,10 @@ cdef class Matrix(sage.structure.element.Matrix):
             sage: bool(M)
             True
         """
-        z = self._base_ring(0)
         cdef Py_ssize_t i, j
         for i from 0 <= i < self._nrows:
             for j from 0 <= j < self._ncols:
-                if self.get_unsafe(i,j) != z:
+                if self.get_unsafe(i,j):
                     return True
         return False
 
