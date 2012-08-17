@@ -134,6 +134,12 @@ def FreeQuadraticModule(
         sage: M3 = FreeModule(ZZ,2,inner_product_matrix=[[1,2],[3,4]])
         sage: M3 is M2
         True
+        sage: A = matrix(QQbar, [[1+sqrt(2),1,1], [1,1+sqrt(2),1-sqrt(2)], [1,1-sqrt(2),1+sqrt(2)]])
+        sage: M4 = FreeModule(ZZ,3,inner_product_matrix=A)
+        sage: M4.inner_product_matrix()
+        [  2.414213562373095?                    1                    1]
+        [                   1   2.414213562373095? -0.4142135623730951?]
+        [                   1 -0.4142135623730951?   2.414213562373095?]
     """
     global _cache
     rank = int(rank)
@@ -146,7 +152,11 @@ def FreeQuadraticModule(
     if inner_product_ring is not None:
         raise NotImplementedError, "An inner_product_ring can not currently be defined."
 
-    inner_product_matrix = sage.matrix.matrix_space.MatrixSpace(base_ring, rank)(inner_product_matrix)
+    try:
+        inner_product_matrix = sage.matrix.matrix_space.MatrixSpace(base_ring, rank)(inner_product_matrix)
+    except (TypeError, ValueError):
+        inner_product_matrix = sage.matrix.constructor.matrix(inner_product_matrix,
+                                                              nrows=rank, ncols=rank)
     inner_product_matrix.set_immutable()
 
     key = (base_ring, rank, inner_product_matrix, sparse)

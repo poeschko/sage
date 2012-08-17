@@ -342,7 +342,11 @@ class FreeModuleFactory(UniqueFactory):
         rank = int(sage.rings.integer.Integer(rank))
 
         if not (inner_product_matrix is None):
-            inner_product_matrix = sage.matrix.matrix_space.MatrixSpace(base_ring, rank)(inner_product_matrix)
+            try:
+                inner_product_matrix = sage.matrix.matrix_space.MatrixSpace(base_ring, rank)(inner_product_matrix)
+            except (TypeError, ValueError):
+                inner_product_matrix = sage.matrix.constructor.matrix(inner_product_matrix,
+                                                                      nrows=rank, ncols=rank)
             inner_product_matrix.set_immutable()
 
         return (base_ring, rank, sparse, inner_product_matrix)
