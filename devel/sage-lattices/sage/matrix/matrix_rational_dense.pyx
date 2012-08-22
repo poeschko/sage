@@ -2745,7 +2745,7 @@ cdef class Matrix_rational_dense(matrix_dense.Matrix_dense):
         Return an LLL reduced or approximated LLL reduced lattice for 
         ``self`` interpreted as a lattice.
         
-        For details on input parameters, see 
+        For details, see 
         :meth:`sage.matrix.matrix_integer_dense.Matrix_integer_dense.LLL`.
         
         EXAMPLE::
@@ -2757,7 +2757,29 @@ cdef class Matrix_rational_dense(matrix_dense.Matrix_dense):
             [    0 -3/40     0]
         """
         A, d = self._clear_denom()
-        return A.LLL(*args, **kwargs) / d        
+        return A.LLL(*args, **kwargs) / d
+    
+    def LLL_gram(self, *args, **kwargs):
+        """
+        LLL reduction of the lattice whose gram matrix is ``self``.
+        
+        For details, see 
+        :meth:`sage.matrix.matrix_integer_dense.Matrix_integer_dense.LLL_gram`.
+        
+        EXAMPLES::
+        
+            sage: M = Matrix(ZZ, 2, 2, [5,3,3,2]) / 7 ; M
+            [5/7 3/7]
+            [3/7 2/7]
+            sage: U = M.LLL_gram(); U
+            [-1  1]
+            [ 1 -2]
+            sage: U.transpose() * M * U
+            [1/7   0]
+            [  0 1/7]
+        """
+        A, d = self._clear_denom()
+        return A.LLL_gram(*args, **kwargs)
 
 
 cdef new_matrix_from_pari_GEN(parent, GEN d):
