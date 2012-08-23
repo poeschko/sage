@@ -6,8 +6,16 @@ This module provides a constructor for some special named lattices.
 AUTHORS:
 
 - Jan Poeschko (2012-08-10): initial version
-
 """
+
+#*****************************************************************************
+#       Copyright (C) 2012 Jan Poeschko <jan@poeschko.com>
+#
+#  Distributed under the terms of the GNU General Public License (GPL)
+#  as published by the Free Software Foundation; either version 2 of
+#  the License, or (at your option) any later version.
+#                  http://www.gnu.org/licenses/
+#*****************************************************************************
 
 def special_lattice(name):
     """
@@ -24,9 +32,12 @@ def special_lattice(name):
     
     EXAMPLES::
     
+        sage: special_lattice('SquareLattice').embedded_basis()
+        [(1, 0), (0, 1)]
+    
     Consider the Leech lattice::
         
-        sage: leech = special_lattice("Leech")
+        sage: leech = special_lattice('Leech')
         sage: leech
         ZZ-lattice of degree 24 and rank 24
         Inner product matrix:
@@ -60,10 +71,11 @@ def special_lattice_names():
     EXAMPLES::
     
         sage: special_lattice_names()
-        ["BodyCenteredCubic"]
+        ['BodyCenteredCubic', 'FaceCenteredCubic', 'HexagonalLattice', 'Leech', 'SimpleCubic', 'SimpleHexagonal', 'SimpleOrthorhombic', 'SquareLattice']
     """
-    return sorted(_inner_product_matrices.keys() | _basis.keys())
+    return sorted(set(_inner_product_matrices.keys() + _basis.keys()))
 
+# named lattices given by basis vectors
 _basis = {
     'BodyCenteredCubic': [
         [2, 0, 0],
@@ -90,6 +102,7 @@ _basis = {
     ],
 }
 
+# named lattices given by their inner product matrix
 _inner_product_matrices = {
     'Leech': [
         [8, 4, 4, 4, 4, 4, 4, 2, 4, 4, 4, 2, 4, 2, 2, 2, 4, 2, 2, 2, 0, 0, 0, -3],

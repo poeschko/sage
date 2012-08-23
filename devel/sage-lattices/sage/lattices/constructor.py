@@ -10,6 +10,15 @@ AUTHORS:
 - Jan Poeschko (2012-08-10): initial version
 """
 
+#*****************************************************************************
+#       Copyright (C) 2012 Jan Poeschko <jan@poeschko.com>
+#
+#  Distributed under the terms of the GNU General Public License (GPL)
+#  as published by the Free Software Foundation; either version 2 of
+#  the License, or (at your option) any later version.
+#                  http://www.gnu.org/licenses/
+#*****************************************************************************
+
 from sage.rings.integer_ring import ZZ
 from sage.matrix.constructor import matrix, random_matrix
 from lattice import Lattice_with_basis, Lattice_ZZ
@@ -17,8 +26,9 @@ from lattice import Lattice_with_basis, Lattice_ZZ
 def Lattice(basis=None, inner_product_matrix=None, quadratic_form=None, algebraic_order=None,
         base_ring=ZZ, **kwargs):
     """
-    The `Lattice` function creates lattices using a given base,
-    an inner product matrix, or an underlying quadratic form.
+    The :func:`Lattice` function creates lattices using a given base,
+    an inner product matrix, an underlying quadratic form,
+    or an order in an algebraic number field.
     
     INPUT:
     
@@ -98,13 +108,13 @@ def Lattice(basis=None, inner_product_matrix=None, quadratic_form=None, algebrai
     else:
         return Lattice_with_basis(base_ring, rank, inner_product_matrix, basis)
     
-def random_lattice(dim):
+def random_lattice(dimension):
     """
     Construct a random ZZ-lattice of a given dimension.
     
     INPUT:
     
-    - ``dim`` -- dimension and rank of the constructed lattice.
+    - ``dimension`` -- dimension of the constructed lattice.
     
     OUTPUT:
     
@@ -122,6 +132,8 @@ def random_lattice(dim):
         [ 0  1 -1]
         [-8  1  1]
         [14 45 45]
+        sage: random_lattice(100).dimension()
+        100
     """
-    basis = random_matrix(ZZ, dim, dim)
+    basis = random_matrix(ZZ, dimension, dimension)
     return Lattice(basis)

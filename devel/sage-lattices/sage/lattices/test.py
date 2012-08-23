@@ -10,13 +10,21 @@ from diamond_cutting import *
 
 import time
 
-L = Lattice([[2, 0], [0, 3]])
+"""L = Lattice([[2, 0], [0, 3]])
 g = plot_lattice(L)
 g.show()
 
 L = special_lattice('BodyCenteredCubic')
 print L.embedded_basis()
 plot_lattice(L).show(viewer='tachyon')
+"""
+
+L = special_lattice('SimpleCubic')
+g = plot_lattice(L)
+V = L.voronoi_cell()
+g += V.plot()
+g.show(viewer='tachyon')
+g.save('lattice.png')
 
 #L = Lattice([[GF(3)(1), 0], [0, 1]])
 #print L

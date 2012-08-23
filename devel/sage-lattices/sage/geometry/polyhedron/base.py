@@ -2682,7 +2682,7 @@ class Polyhedron_base(SageObject):
         ALGORITHM:
         
         Uses scipy Delaunay triangulation and sums up the volumes of
-        resulting the simplexes.
+        resulting the simplices.
         """
         from scipy.spatial import Delaunay
         

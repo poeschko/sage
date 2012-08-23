@@ -9,17 +9,25 @@ The class inheritance hierarchy is:
 
 - :class:`FreeQuadraticModule_ambient_pid`
 
-    - :class:`Lattice_with_basis`
+  - :class:`Lattice_with_basis`
     
-      - :class:`Lattice_ZZ`
+    - :class:`Lattice_ZZ`
       
-Lattices are created using the `Lattice` factory function.
+Lattices are created using the :func:`Lattice` factory function.
 
 AUTHORS:
 
 - Jan Poeschko (2012-05-26): initial version
-
 """
+
+#*****************************************************************************
+#       Copyright (C) 2012 Jan Poeschko <jan@poeschko.com>
+#
+#  Distributed under the terms of the GNU General Public License (GPL)
+#  as published by the Free Software Foundation; either version 2 of
+#  the License, or (at your option) any later version.
+#                  http://www.gnu.org/licenses/
+#*****************************************************************************
 
 import sage.matrix.matrix_space
 
@@ -521,7 +529,7 @@ class Lattice_ZZ(Lattice_with_basis):
                 [ -6   0   3   3]
                 [ -6 -24  -6  -5]
             sage: V = L.voronoi_cell()
-            sage: V.volume()
+            sage: V.convex_volume()
             678.0
             sage: sqrt(L.discriminant())
             678
