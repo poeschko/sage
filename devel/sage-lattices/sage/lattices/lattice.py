@@ -11,13 +11,6 @@ The class inheritance hierarchy is:
 
   - :class:`Lattice_ZZ`
 
-    - :class:`Lattice_ZZ_in_RR`
-    
-Real-valued vectors are coerced to rationals when used in lattices
-(see discussion at
-https://groups.google.com/forum/?fromgroups#!topic/sage-devel/omE8nI2HFbg).
-Complex-valued vectors do not work in lattices.
-
 AUTHORS:
 
 - Jan Poeschko (2012-05-26): initial version
@@ -42,17 +35,23 @@ from sage.symbolic.ring import SymbolicRing
 from diamond_cutting import calculate_voronoi_cell
 
 class Lattice_with_basis(FreeQuadraticModule_ambient_pid):
-#(FreeModule_submodule_with_basis_pid):
     """
-    Construct a general lattice over a PID with a given basis.
+    Construct a general lattice over a PID with an inner product matrix
+    and a given basis of an embedding.
     
     INPUT:
     
-    - ``ambient`` -- ambient free module over a principal ideal domain `R`,
-      i.e. `R^n`;
+    - ``base_ring`` -- the base ring of the lattice;
+    
+    - ``rank`` -- the rank of the lattice;
+    
+    - ``inner_product_matrix`` -- the inner product matrix of the lattice;
 
-    - ``basis`` -- list of elements of `K^n`, where `K` is the fraction field
-      of `R`.
+    - ``embedded_basis`` -- basis elements of the embedding of the lattice.
+    
+    OUTPUT:
+    
+    A lattice.
       
     EXAMPLES::
     
@@ -89,29 +88,81 @@ class Lattice_with_basis(FreeQuadraticModule_ambient_pid):
             sage: TestSuite(L).run()
         """
         super(Lattice_with_basis, self).__init__(base_ring, rank, inner_product_matrix)
-        #super(Lattice_with_basis, self).__init__(ambient, basis, inner_product_matrix)
-        #super(Lattice_with_basis, self).__init__(ambient, basis, echelonize=False,
-        #    already_echelonized=True)
         self._embedded_basis = matrix(embedded_basis).rows()
         if not self._embedded_basis:
             raise ValueError("basis must not be empty")
         
     def degree(self):
+        """
+        The degree of this lattice, i.e., the degree of the embedding vector space.
+        
+        EXAMPLES::
+            
+            sage: Lattice([[1, 0, 0], [0, 1, 0]]).degree()
+            3
+        """
         return len(self._embedded_basis[0])
         
     def embedded_basis(self):
+        """
+        The basis of the embedding of this lattice.
+        
+        EXAMPLES::
+            
+            sage: Lattice([[1, 0, 0], [0, 1, 0]]).embedded_basis()
+            [(1, 0, 0), (0, 1, 0)]
+        """
         return self._embedded_basis
         
     def embedded_basis_matrix(self):
+        """
+        The basis of the embedding of this lattice in matrix form
+        
+        EXAMPLES::
+            
+            sage: Lattice([[1, 0, 0], [0, 1, 0]]).embedded_basis_matrix()
+            [1 0 0]
+            [0 1 0]
+        """
         return matrix(self._embedded_basis)
     
     def to_embedded(self, vector):
+        """
+        Convert a coordinate representation of a vector in this lattice
+        to its embedded form.
+        
+        EXAMPLES::
+            
+            sage: L = Lattice([[2, 1], [0, 3]], reduce=False)
+            sage: L.to_embedded((2, 3))
+            (4, 11)
+        """
         return sum(v * b for v, b in zip(vector, self.embedded_basis()))
     
     def determinant(self):
+        """
+        Calculate the determinant of this lattice, i.e.,
+        the determinant of its Gram (inner product) matrix.
+        
+        EXAMPLES::
+        
+            sage: L = Lattice(inner_product_matrix=[[1, 0, 0], [0, 2, 0], [0, 0, 3]])
+            sage: L.determinant()
+            6
+        """
         return self.inner_product_matrix().determinant()
     
     def discriminant(self):
+        """
+        Calculate the discriminant of this lattice, i.e.,
+        the absolute value of its determinant.
+        
+        EXAMPLES::
+        
+            sage: L = Lattice(inner_product_matrix=[[1, 0, 0], [0, 2, 0], [0, 0, 3]])
+            sage: L.discriminant()
+            6
+        """
         return abs(self.determinant())
         
     def _repr_(self):
@@ -142,8 +193,20 @@ class Lattice_with_basis(FreeQuadraticModule_ambient_pid):
         
 class Lattice_ZZ(Lattice_with_basis):
     """
-    Construct a ZZ-lattice that is embedded in a real-valued space
-    (e.g. RR^n, QQ^n, or ZZ^n).
+    Construct a ZZ-lattice.
+    
+    INPUT:
+    
+    - ``rank``;
+    - ``inner_product_matrix``;
+    - ``embedded_basis``;
+    - ``reduce`` -- whether to LLL-reduce the given lattice
+      (both its inner product matrix and its embedded basis will be reduced if ``True``,
+      which is the default).
+      
+    OUTPUT:
+    
+    A ZZ-lattice.
     
     EXAMPLES::
     
@@ -182,7 +245,7 @@ class Lattice_ZZ(Lattice_with_basis):
         sage: L.discriminant()
         81
     """
-    def __init__(self, base_ring, rank, inner_product_matrix, embedded_basis, reduce=True):
+    def __init__(self, rank, inner_product_matrix, embedded_basis, reduce=True):
         """
         See :class:`Lattice_ZZ` for documentation.
         
@@ -191,53 +254,63 @@ class Lattice_ZZ(Lattice_with_basis):
             sage: L = Lattice([[2, 1, 0], [0, 1, 0]])
             sage: TestSuite(L).run()
         """
-        '''if reduce_basis:
-            # coerce vectors to QQ^n (QQ is the fraction field of ZZ)
-            # so that LLL algorithm can be applied
-            degree = len(basis[0])
-            fraction_field = QQ ** degree
-            basis = [fraction_field(x) for x in basis]
-            
-            # create basis matrix and apply LLL algorithm 
-            basis_matrix = matrix(basis)
-            basis_matrix = basis_matrix.LLL()
-            
-            # remove 0-vectors from basis
-            basis = list(v for v in basis_matrix if v)
-            self.__reduced_basis = basis
-        else:
-            self.__reduced_basis = None'''
-        #super(Lattice_ZZ, self).__init__(basis)
         self.__reduced_inner_product_matrix = None
         self.__reduced_embedded_basis_matrix = None
         if reduce:
-            inner_product_matrix, embedded_basis_matrix = self.__reduce(inner_product_matrix,
+            inner_product_matrix, embedded_basis_matrix = self._reduce(inner_product_matrix,
                 matrix(embedded_basis))
             embedded_basis = embedded_basis_matrix.rows()
         
+        base_ring = ZZ
         super(Lattice_ZZ, self).__init__(base_ring, rank, inner_product_matrix, embedded_basis)
         
-        self.__voronoi_cell = None  # cached result of voronoi_cell
-        #self.__reduced_basis = None
-        self.__shortest_vectors = None
+        self.__voronoi_cell = None      # cached result of voronoi_cell
+        self.__shortest_vectors = None  # cached result of _shortest_vectors
         
-    '''def embedded_basis(field = None):
-        L = self.gram_matrix()
-        if field:
-            L = L.change_ring(field)
-        return L.cholesky().rows()'''
+    def _reduce(self, inner_product_matrix, embedded_basis_matrix):
+        """
+        Perform the LLL-reduction of inner product matrix and embedded basis.
         
-    def __reduce(self, inner_product_matrix, embedded_basis_matrix):
+        TESTS::
+        
+            sage: L = Lattice([[6, 1], [9, 0]], reduce=False)
+            sage: L.reduced_embedded_basis_matrix()
+            [ 0  3]
+            [ 3 -1]
+        """
         U = inner_product_matrix.LLL_gram()
         reduced_ipm = U.transpose() * inner_product_matrix * U
         reduced_ebm = U.transpose() * embedded_basis_matrix
         self.__reduced_inner_product_matrix = reduced_ipm
         self.__reduced_embedded_basis_matrix = reduced_ebm
         return reduced_ipm, reduced_ebm
+    
+    def reduced_inner_product_matrix(self):
+        """
+        Return an LLL-reduced inner product matrix for this lattice.
+                
+        EXAMPLES::
+        
+            sage: L = Lattice([[6, 1], [9, 0]], reduce=False); L
+            ZZ-lattice of degree 2 and rank 2
+            Inner product matrix:
+            [37 54]
+            [54 81]
+            Basis matrix:
+            [6 1]
+            [9 0]
+            sage: L.reduced_inner_product_matrix()
+            [ 9 -3]
+            [-3 10]
+        """
+        if self.__reduced_inner_product_matrix is not None:
+            return self.__reduced_inner_product_matrix
+        ipm, ebm = self._reduce(self.inner_product_matrix(), self.embedded_basis_matrix())
+        return ipm
         
     def reduced_embedded_basis_matrix(self):
         """
-        Return an LLL-reduced basis for this lattice.
+        Return an LLL-reduced embedded basis for this lattice in matrix form.
         
         EXAMPLES::
         
@@ -249,21 +322,25 @@ class Lattice_ZZ(Lattice_with_basis):
             Basis matrix:
             [6 1]
             [9 0]
-            sage: L.reduced_embedded_basis()
-            [(0, 3), (3, -1)]
+            sage: L.reduced_embedded_basis_matrix()
+            [ 0  3]
+            [ 3 -1]
         """
         if self.__reduced_embedded_basis_matrix is not None:
             return self.__reduced_embedded_basis_matrix
-        ipm, ebm = self.__reduce(self.inner_product_matrix(), self.embedded_basis_matrix())
+        ipm, ebm = self._reduce(self.inner_product_matrix(), self.embedded_basis_matrix())
         return ebm
-        """if self.__reduced_basis is None:
-            basis_matrix = self.basis_matrix()
-            basis_matrix = basis_matrix.LLL()
-            basis = list(v for v in basis_matrix if v)
-            self.__reduced_basis = basis
-        return self.__reduced_basis"""
         
     def reduced_embedded_basis(self):
+        """
+        Return an LLL-reduced embedded basis for this lattice.
+        
+        EXAMPLES::
+        
+            sage: L = Lattice([[6, 1], [9, 0]], reduce=False)
+            sage: L.reduced_embedded_basis()
+            [(0, 3), (3, -1)]
+        """
         return self.reduced_embedded_basis_matrix().rows()
         
     def _repr_(self):
@@ -285,23 +362,35 @@ class Lattice_ZZ(Lattice_with_basis):
             self.degree(), self.rank(), self.inner_product_matrix(), self.embedded_basis_matrix())
         
     def _shortest_vectors(self, max_count=None, max_length=0):
+        """
+        Compute shortest vectors and their number and length (potentially).
+        
+        INPUT:
+        
+        - ``max_count`` -- maximum number of vectors to store in the result
+          (default: all);
+        - ``max_length`` -- maximal length of vectors to consider
+          (default: 0, i.e., consider shortest vectors).
+          
+        OUTPUT:
+        
+        A triple consisting of the number of corresponding (shortest) vectors,
+        their length, and a list of at most ``max_count`` such vectors. 
+        
+        TESTS::
+        
+            sage: L = Lattice([[1, 0], [0, 1]])
+            sage: L.shortest_vectors_count()
+            4
+        """
         default = max_length == 0 and max_count == 0
         if default and self.__shortest_vectors is not None:
             return self.__shortest_vectors
-        qf = self.gram_matrix()
-        #if max_length is None:
-        #    # choose trivial upport bound for vector length
-        #    max_length = sum(sum(x) ** 2 for x in self.embedded_basis())
+        qf = self.reduced_inner_product_matrix()
         if max_count is None:
+            # determine the number of shortest vectors
             max_count = self._shortest_vectors(max_length=max_length, max_count=0)[0] #self.degree()
-        #if self.base_ring() == QQ:
-        #    flag = 2
-        #else:
-        #    flag = 0
-        #flag = 2 # allow non-integral entries 
         count, length, vectors = pari(qf).qfminim(0, max_count)
-        #vectors = vectors.python()
-        #return [self.linear_combination_of_basis(v) for v in vectors.columns()]
         result = count, length, vectors.python().columns()
         if default:
             self.__shortest_vectors = result
@@ -310,6 +399,16 @@ class Lattice_ZZ(Lattice_with_basis):
     def shortest_vectors_count(self, max_length=0):
         """
         Find the number of shortest vectors in the lattice.
+        
+        INPUT:
+        
+        - ``max_length`` -- the maximal length of vectors to consider.
+        
+        EXAMPLES::
+        
+            sage: L = Lattice([[1, 0], [0, 1]])
+            sage: L.shortest_vectors_count()
+            4
         """
         count, length, vectors = self._shortest_vectors(max_count=0, max_length=max_length)
         return count
@@ -317,6 +416,12 @@ class Lattice_ZZ(Lattice_with_basis):
     def shortest_vectors_length(self):
         """
         Find the length of the shortest vectors in the lattice.
+        
+        EXAMPLES::
+        
+            sage: L = Lattice([[1, 0], [0, 1]])
+            sage: L.shortest_vectors_length()
+            1
         """
         count, length, vectors = self._shortest_vectors(max_count=0)
         return length
@@ -412,7 +517,7 @@ class Lattice_ZZ(Lattice_with_basis):
     
     def voronoi_relevant_vectors(self):
         """
-        Compute the vectors inducing the Voronoi cell.
+        Compute the embedded vectors inducing the Voronoi cell.
         
         OUTPUT:
         
@@ -444,12 +549,12 @@ class Lattice_ZZ(Lattice_with_basis):
             a = ieq[1:]
             n = sum(y ** 2 for y in a)
             return vector([2 * y * c / n for y in a])
-
+            
         return [defining_point(ieq) for ieq in V.inequality_generator()]
     
     def closest_vector(self, t):
         """
-        Compute the closest vector in the lattice to a given vector.
+        Compute the closest vector in the embedded lattice to a given vector.
         
         INPUT:
         
@@ -507,15 +612,15 @@ class Lattice_ZZ(Lattice_with_basis):
         
 def Lattice(basis=None, inner_product_matrix=None, quadratic_form=None, base_ring=ZZ, **kwargs):
     """
-    The `Lattice` function creates lattices using a given base
-    or an underlying quadratic form.
+    The `Lattice` function creates lattices using a given base,
+    an inner product matrix, or an underlying quadratic form.
     
     INPUT:
     
     - ``basis``
     - ``inner_product_matrix``
     - ``quadratic_form``
-    - ``base_ringbase_ring``
+    - ``base_ring``
     
     OUTPUT:
     
@@ -544,56 +649,30 @@ def Lattice(basis=None, inner_product_matrix=None, quadratic_form=None, base_rin
         [                  1                   0                   0]
         [                  1  1.732050807568878?                   0]
         [                3/2 0.5773502691896258?  1.848422751068237?]
+            
+    It is an error to specify an empty basis::
+    
+        sage: Lattice([])
+        Traceback (most recent call last):
+        ...
+        ValueError: basis must not be empty
     """
     if quadratic_form is not None:
         inner_product_matrix = quadratic_form.Gram_matrix_rational()
     if basis is not None:
         if not basis:
             raise ValueError("basis must not be empty")
-        #if inner_product_matrix is not None:
-        #    raise TypeError("basis and inner_product_matrix cannot both be given")
         basis = matrix(basis)
         rank = basis.dimensions()[0]
         if inner_product_matrix is None:
             inner_product_matrix = basis * basis.transpose()
     elif inner_product_matrix is not None:
         inner_product_matrix = matrix(inner_product_matrix)
-        #K = inner_product_matrix.base_ring()
-        #rank = len(inner_product_matrix)
         rank = inner_product_matrix.dimensions()[0]
         basis = inner_product_matrix.cholesky()
     else:
         raise TypeError("basis or inner_product_matrix must be given")
-    #ambient = base_ring ** rank
     if base_ring == ZZ and inner_product_matrix.base_ring() == ZZ:
-        return Lattice_ZZ(base_ring, rank, inner_product_matrix, basis, **kwargs)
+        return Lattice_ZZ(rank, inner_product_matrix, basis, **kwargs)
     else:
         return Lattice_with_basis(base_ring, rank, inner_product_matrix, basis)
-    '''if basis is not None:
-        if not basis:
-            raise ValueError("basis must not be empty")
-        degree = len(basis[0])
-        basis_matrix = matrix(basis)
-        K = basis_matrix.base_ring()
-        if coefficient_ring == ZZ:
-            if K <= RR:
-                return Lattice_ZZ_in_RR(basis, **kwargs)
-            else:
-                return Lattice_ZZ(basis)
-        else:
-            return Lattice_with_basis(coefficient_ring ** degree, basis)
-    elif quadratic_form is not None:
-        quadratic_form = matrix(quadratic_form)
-        # apply Cholesky decomposition to Gram matrix to get basis
-        try:
-            Q = quadratic_form.cholesky()
-        except ValueError:
-            # switch to SymbolicRing matrix to allow Cholesky decomposition
-            # containing square roots etc.
-            dim = quadratic_form.dimensions()
-            space = MatrixSpace(SymbolicRing(), dim[0], dim[1])
-            quadratic_form = space(quadratic_form)
-            Q = quadratic_form.cholesky_decomposition()
-        return Lattice(basis=Q, coefficient_ring=coefficient_ring, **kwargs)
-    else:
-        raise TypeError("basis or quadratic_form must be given")'''
