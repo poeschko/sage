@@ -1,3 +1,11 @@
+"""
+Diamond cutting implementation
+
+AUTHORS:
+
+- Jan Poeschko (2012-07-02): initial version
+"""
+
 from sage.geometry.polyhedron.constructor import Polyhedron
 from sage.matrix.constructor import matrix, identity_matrix
 from sage.modules.free_module_element import vector

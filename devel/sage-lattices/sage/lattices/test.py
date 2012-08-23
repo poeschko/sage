@@ -1,3 +1,9 @@
+"""
+Internal test script
+
+This is not meant to appear in the final Sage release.
+"""
+
 from sage.all import *
 
 from diamond_cutting import *

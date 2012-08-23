@@ -1,1 +1,2 @@
-from lattice import Lattice
+from constructor import Lattice, random_lattice
+from special_lattices import special_lattice

@@ -7,9 +7,13 @@ specific base classes.
 
 The class inheritance hierarchy is:
 
-- :class:`Lattice_with_basis`
+- :class:`FreeQuadraticModule_ambient_pid`
 
-  - :class:`Lattice_ZZ`
+    - :class:`Lattice_with_basis`
+    
+      - :class:`Lattice_ZZ`
+      
+Lattices are created using the `Lattice` factory function.
 
 AUTHORS:
 
@@ -164,6 +168,21 @@ class Lattice_with_basis(FreeQuadraticModule_ambient_pid):
             6
         """
         return abs(self.determinant())
+    
+    def is_unimodular(self):
+        """
+        Determines whether this lattice is unimodular, i.e.,
+        whether its determinant is 1.
+        
+        EXAMPLES::
+            
+            sage: L = Lattice([[1, 0], [0, 1]])
+            sage: L.is_unimodular()
+            True
+            sage: Lattice([[2, 0], [0, 3]]).is_unimodular()
+            False
+        """
+        return self.determinant() == 1
         
     def _repr_(self):
         """
@@ -609,70 +628,3 @@ class Lattice_ZZ(Lattice_with_basis):
             t_new = t_new - CVPP_2V(t_new, V_scaled, ZZ(2 ** (i - 1)) * voronoi_cell)
             i -= 1
         return t - t_new
-        
-def Lattice(basis=None, inner_product_matrix=None, quadratic_form=None, base_ring=ZZ, **kwargs):
-    """
-    The `Lattice` function creates lattices using a given base,
-    an inner product matrix, or an underlying quadratic form.
-    
-    INPUT:
-    
-    - ``basis``
-    - ``inner_product_matrix``
-    - ``quadratic_form``
-    - ``base_ring``
-    
-    OUTPUT:
-    
-    A lattice.
-    
-    EXAMPLES::
-    
-        sage: Lattice([[2, 0, 0], [0, 1, 0]])
-        ZZ-lattice of degree 3 and rank 2
-        Inner product matrix:
-        [1 0]
-        [0 4]
-        Basis matrix:
-        [ 0  1  0]
-        [-2  0  0]
-        
-    A lattice can be specified by a quadratic form::
-        
-        sage: Lattice(quadratic_form=QuadraticForm(ZZ, 3, [1,2,3,4,5,6]))
-        Lattice of degree 3 and rank 3 over Integer Ring
-        Inner product matrix:
-        [  1   1 3/2]
-        [  1   4 5/2]
-        [3/2 5/2   6]
-        Basis matrix:
-        [                  1                   0                   0]
-        [                  1  1.732050807568878?                   0]
-        [                3/2 0.5773502691896258?  1.848422751068237?]
-            
-    It is an error to specify an empty basis::
-    
-        sage: Lattice([])
-        Traceback (most recent call last):
-        ...
-        ValueError: basis must not be empty
-    """
-    if quadratic_form is not None:
-        inner_product_matrix = quadratic_form.Gram_matrix_rational()
-    if basis is not None:
-        if not basis:
-            raise ValueError("basis must not be empty")
-        basis = matrix(basis)
-        rank = basis.dimensions()[0]
-        if inner_product_matrix is None:
-            inner_product_matrix = basis * basis.transpose()
-    elif inner_product_matrix is not None:
-        inner_product_matrix = matrix(inner_product_matrix)
-        rank = inner_product_matrix.dimensions()[0]
-        basis = inner_product_matrix.cholesky()
-    else:
-        raise TypeError("basis or inner_product_matrix must be given")
-    if base_ring == ZZ and inner_product_matrix.base_ring() == ZZ:
-        return Lattice_ZZ(rank, inner_product_matrix, basis, **kwargs)
-    else:
-        return Lattice_with_basis(base_ring, rank, inner_product_matrix, basis)
