@@ -2660,6 +2660,53 @@ class Polyhedron_base(SageObject):
                 return volume
 
         raise ValueError, "lrs did not return a volume"
+    
+    
+    def convex_volume(self):
+        """
+        Computes the volume of the convex hull of a polytope.
+        
+        OUTPUT:
+        
+        The volume of the convex hull of the vertices.
+
+        EXAMPLES::
+
+            sage: polytopes.n_cube(3).convex_volume()
+            8.0
+            sage: (polytopes.n_cube(3)*2).convex_volume()
+            64.0
+            sage: polytopes.twenty_four_cell().convex_volume()
+            2.0
+            
+        ALGORITHM:
+        
+        Uses scipy Delaunay triangulation and sums up the volumes of
+        resulting the simplexes.
+        """
+        from scipy.spatial import Delaunay
+        
+        def volume_simplex(S):
+            """
+            Computes the volume of a simplex.
+            
+            INPUT:
+            
+            - ``S`` -- list of vertices of the simplex.
+            
+            OUTPUT:
+            
+            The volume of the simplex.
+            """
+            n = len(S)
+            V = matrix([vector(list(S[k] - S[0])) for k in range(1, n)]).transpose()
+            return abs(V.determinant()) / ZZ(n - 1).factorial()
+        
+        D = Delaunay(self.vertices())
+        vol = 0
+        for simplex in D.vertices:
+            vol += volume_simplex([D.points[index] for index in simplex])
+        return vol
 
 
     def contains(self, point):
