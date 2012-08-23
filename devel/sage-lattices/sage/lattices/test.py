@@ -67,6 +67,23 @@ matas6 = """
 -4.0824829046386E-01  -4.8304589153965E-01  -5.9160797830996E-01  -7.6376261582597E-01  -1.0801234497346E+00   1.8708286933870E+00  
 """
 
+def volume_simplex(S):
+    n = len(S)
+    V = matrix([vector(list(S[k] - S[0])) for k in range(1, n)]).transpose()
+    return abs(V.determinant()) / factorial(n - 1)
+
+def volume(P):
+    from scipy.spatial import Delaunay
+    if hasattr(P, 'vertices'):
+        V = P.vertices()
+    else:
+        V = P
+    D = Delaunay(V)
+    vol = 0
+    for simplex in D.vertices:
+        vol += volume_simplex([D.points[index] for index in simplex])
+    return vol
+
 def test_lattice(data):
     M = []
     for line in data.splitlines():
@@ -80,11 +97,31 @@ def test_lattice(data):
             M.append(row)
     M = matrix(M)
     start = time.clock()
-    V = calculate_voronoi_cell(M, radius=3, debug=True)
+    V = calculate_voronoi_cell(M, radius=10, debug=True)
     stop = time.clock()
     print V.Vrepresentation()
     print V.Hrepresentation()
     print "Computed Voronoi cell in %f seconds" % (stop - start)
+    print "Volume: %f" % volume(V)
+    L = Lattice(M)
+    print "Det:    %f" % L.determinant()
+    
+#test_lattice(cr63)
+
+#test_lattice("""
+#2 543 2 123
+#432 425 123 5
+#43 21 8 0
+#45 7 0 1
+#""")
+
+m3 = """
+1 2 0
+0 3 4
+3 1 0
+"""
+
+test_lattice(m3)
     
 #test_lattice(m2b)
 #test_lattice(cr6)
@@ -98,6 +135,10 @@ def test_lattice(data):
 
 #L = Lattice(quadratic_form=[[2,0], [0,2]])
 
+#L = Lattice([[-1, -1, 0], [1, -1, 0], [0, 1, -1]])
+#V = L.voronoi_cell()
+#print V.lrs_volume()
+
 """L = Lattice(quadratic_form=[[1,0], [0,1]])
 print L.closest_vector([0.4, 0.2])
 print L.closest_vector([1.5, 2.5])
@@ -107,7 +148,7 @@ print L.closest_vector([6, 0.6])
 L = Lattice([[1,0,0], [0,1,0]])
 print L.closest_vector([4, 2.6, 3.6])"""
 
-print Lattice(basis=[[1, 0], [0, 1]])
+"""print Lattice(basis=[[1, 0], [0, 1]])
 print Lattice(basis=[[3, 2, 0], [1, 0, 1]])
 print Lattice(basis=[[ZZ(1) / ZZ(2), 0], [0, 1]])
 print Lattice(basis=[[0.5, 0], [0, 1]])
@@ -153,6 +194,7 @@ print L.shortest_vectors_count()
 
 L = Lattice([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 print L.shortest_vectors()
+"""
 
 """
 #GM = matrix([[0, 3], [3, -1]])
