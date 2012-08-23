@@ -2634,6 +2634,9 @@ class Polyhedron_base(SageObject):
             print 'You must install the optional lrs package ' \
                   'for this function to work'
             raise NotImplementedError
+        
+        from sage.misc.misc import tmp_filename
+        from subprocess import Popen, PIPE
 
         in_str = self.cdd_Vrepresentation()
         in_str += 'volume'
@@ -2644,7 +2647,7 @@ class Polyhedron_base(SageObject):
         if verbose: print in_str
 
         lrs_procs = Popen(['lrs',in_filename],
-                          stdin = PIPE, stdout=PIPE, stderr=PIPE)
+                          stdin=PIPE, stdout=PIPE, stderr=PIPE)
         ans, err = lrs_procs.communicate()
         if verbose:
             print ans
