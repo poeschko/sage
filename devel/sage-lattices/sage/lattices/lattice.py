@@ -506,6 +506,26 @@ class Lattice_ZZ(Lattice_with_basis):
             sage: V.Vrepresentation()
             (A vertex at (1/2, -1/2), A vertex at (1/2, 1/2), A vertex at (-1/2, 1/2), A vertex at (-1/2, -1/2))
             
+        The volume of the Voronoi cell is the square root of the discriminant of the lattice::
+        
+            sage: L = random_lattice(4); L
+                ZZ-lattice of degree 4 and rank 4
+                Inner product matrix:
+                [  2   1   0  -1]
+                [  1   7   3   1]
+                [  0   3  54   3]
+                [ -1   1   3 673]
+                Basis matrix:
+                [  0   0   1  -1]
+                [  1  -1   2   1]
+                [ -6   0   3   3]
+                [ -6 -24  -6  -5]
+            sage: V = L.voronoi_cell()
+            sage: V.volume()
+            678.0
+            sage: sqrt(L.discriminant())
+            678
+            
         Lattices not having full dimension are handled as well::
         
             sage: L = Lattice([[2, 0, 0], [0, 2, 0]])

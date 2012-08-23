@@ -10,6 +10,14 @@ from diamond_cutting import *
 
 import time
 
+L = Lattice([[2, 0], [0, 3]])
+g = plot_lattice(L)
+g.show()
+
+L = special_lattice('BodyCenteredCubic')
+print L.embedded_basis()
+plot_lattice(L).show(viewer='tachyon')
+
 #L = Lattice([[GF(3)(1), 0], [0, 1]])
 #print L
 #print L.zero() + L.an_element()
@@ -23,6 +31,25 @@ import time
 #print L
 
 #L.voronoi_cell()
+
+"""L = Lattice([[1, 2, 0], [4, 0, 6], [0, 8, 9]])
+#V = L.voronoi_cell()
+V = calculate_voronoi_cell(L.embedded_basis_matrix(), radius=None, debug=True)
+print V
+print V.Vrepresentation()
+print L.embedded_basis_matrix()
+print L.gram_matrix()
+print L.discriminant()
+print V.volume()
+print V.lrs_volume()
+
+L = Lattice(matrix([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]))
+#V = L.voronoi_cell(radius=100)
+V = calculate_voronoi_cell(L.embedded_basis_matrix(), radius=847, debug=True)
+print V.volume()
+print V.lrs_volume()
+print L.discriminant()
+"""
 
 cr63 = """
 4.47    0.00    0.00    0.00    0.00    0.00    
@@ -127,7 +154,7 @@ m3 = """
 3 1 0
 """
 
-test_lattice(m3)
+#test_lattice(m3)
     
 #test_lattice(m2b)
 #test_lattice(cr6)

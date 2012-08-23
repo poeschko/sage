@@ -167,7 +167,7 @@ def calculate_voronoi_cell(basis, radius=None, debug=False):
     
     # twice the length of longest vertex in Q is a safe choice
     if radius is None:
-        radius = 2 * max(abs(v.vector()).N() for v in Q.vertex_generator())
+        radius = 2 * max(abs(v) ** 2 for v in basis)
     
     V = diamond_cut(Q, basis, radius, debug=debug)
     
