@@ -2488,10 +2488,10 @@ cdef class Matrix_integer_dense(matrix_dense.Matrix_dense):   # dense or sparse
             U = P.lllgramint()
         except (RuntimeError, ArithmeticError), msg:
             raise ValueError("not a definite matrix")
-        MS = matrix_space.MatrixSpace(ZZ,n)
-        U = MS(U.python())
+        # convert Pari matrix to Sage Matrix
+        U = U.python()
         # Fix last column so that det = +1
-        if U.det() == -1:
+        if U.is_square() and U.det() == -1:
             for i in range(n):
                 U[i,n-1] = - U[i,n-1]
         return U
