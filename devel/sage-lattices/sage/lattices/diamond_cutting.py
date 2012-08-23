@@ -42,7 +42,15 @@ def plane_inequality(v):
 
 def jacobi(M):
     """
-    Cholesky/Jacobi decomposition of M
+    Compute the Cholesky/Jacobi decomposition of M.
+    
+    EXAMPLES::
+    
+        sage: from sage.lattices.diamond_cutting import jacobi
+        sage: jacobi(identity_matrix(3) * 4)
+        [4 0 0]
+        [0 4 0]
+        [0 0 4]
     """
     
     dim = M.dimensions()
@@ -63,7 +71,30 @@ def jacobi(M):
 
 def diamond_cut(V, GM, C, debug=False):
     """
-    Perform diamond cutting on Polyhedron V with basis matrix GM and radius C
+    Perform diamond cutting on polyhedron V with basis matrix GM and radius C.
+    
+    INPUT:
+    
+    - ``V``: polyhedron to cut from;
+    
+    - ``GM``: half of the basis matrix of the lattice;
+    
+    - ``C``: radius to use in cutting algorithm;
+    
+    - ``debug``: whether to print debug information.
+    
+    OUTPUT:
+    
+    A :class:``Polyhedron`` instance.
+    
+    EXAMPLES::
+    
+        sage: from sage.lattices.diamond_cutting import diamond_cut
+        sage: V = Polyhedron([[0], [2]])
+        sage: GM = matrix([2])
+        sage: V = diamond_cut(V, GM, 4)
+        sage: V.vertices()
+        [[2], [0]]
     """
     
     # coerce to floats 
@@ -152,6 +183,25 @@ def diamond_cut(V, GM, C, debug=False):
 def calculate_voronoi_cell(basis, radius=None, debug=False):
     """
     Calculate the Voronoi cell of the lattice defined by basis
+    
+    INPUT:
+    
+    - ``basis``: embedded basis matrix of the lattice;
+    
+    - ``radius``: radius of basis vectors to consider;
+    
+    - ``debug``: whether to print debug information.
+    
+    OUTPUT:
+    
+    A :class:``Polyhedron`` instance.
+    
+    EXAMPLES::
+        
+        sage: from sage.lattices.diamond_cutting import calculate_voronoi_cell
+        sage: V = calculate_voronoi_cell(matrix([[1, 0], [0, 1]]))
+        sage: V.convex_volume()
+        1.0
     """
     
     dim = basis.dimensions()
